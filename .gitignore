@@ -1,0 +1,11 @@
+*.pyc
+*/*.pyc
+*/*/*.pyc
+*.json
+*.png
+*.npz
+*.npy
+*.jpeg
+*.jpg
+*.bmp
+
