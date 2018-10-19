@@ -52,7 +52,6 @@ def _loop_equal(a,b):
         return True
     else:
         return False
-
  
 def progress():
     if not osp.exists(_c.data_info):
