@@ -9,7 +9,6 @@ config_l=c.parse_layer_args()
 
 
 def patch_generator(x, is_training):
-
     # input data shape
     # 256*256*(3:origin image )
     print('-'*50,'Input Node Name','-'*50)
@@ -21,7 +20,6 @@ def patch_generator(x, is_training):
     model_parms=dict(pool_size=[p_size,p_size],kernel_size=k_size,conv='separable_conv2d',norm='batch_norm',activation='relu')
     x=tf.reshape(x,[-1]+config_l.input_shape[:],name='Input.x')
     block_0=_bk.conv_norm_activation(x,filters=init_filter,**model_parms)
-    # tf
     block_1=_bk.res_v1_block(block_0,**model_parms) 
     block_2=_bk.res_v1_block(block_1,**model_parms) 
     block_3=_bk.res_v1_block(block_2,**model_parms) 

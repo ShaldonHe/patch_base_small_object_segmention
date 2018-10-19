@@ -1,10 +1,9 @@
 import argparse as ag
 
-def parse_layer_args():
-    desc = "skin slice Layer model"
+def patch_d_args():
     k_size=512
     layer_num=5
-    parser = ag.ArgumentParser(description=desc)
+    parser = ag.ArgumentParser()
     parser.add_argument('--label_dir', type=str, default='./data/label_data/layer')
     parser.add_argument('--size',type=int,default=k_size)
     parser.add_argument('--layer_num',type=int,default=layer_num)
