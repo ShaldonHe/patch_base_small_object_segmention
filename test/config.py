@@ -1,9 +1,9 @@
 import argparse as ag
 import numpy as np
 import model.config as _model_c
-_model_layer=_model_c.parse_layer_args()
+_model_layer=_model_c.parse_args()
 """parsing and configuration"""
-def parse_layer_args():
+def parse_args():
     desc = "layer segmention test config"
     parser = ag.ArgumentParser(description=desc)
     parser.add_argument('--batch_size', type=int, default=10, help='The size of batch')

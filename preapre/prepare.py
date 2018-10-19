@@ -2,104 +2,152 @@ import numpy as np
 import os.path as osp
 import os
 import matplotlib.pyplot as plt
-from . import config as con
-import data.config as data_con
-import model.config as model_con
-c=con.parse_args()
-data_c=data_con.parse_args()
-slice_c=model_con.parse_slice_args()
-layer_c=model_con.parse_layer_args()
+from . import config as _con
+# import data.config as _data_con
+# import model.config as _model_con
+_c=_con.parse_args()
 #prepare train file
 import libs.common.file_interface as libfi
 import matplotlib.pyplot as plt
 import libs.common.img_pair_interface as libimg
+import libs.common.view_interface as libvi
 import libs.collection.prep_utility as prep
-import PIL.Image as pilm
-def progress():
-    if not osp.exists(data_c.data_info):
-        com_lines=[]
-    else:
-        loaded=np.load(data_c.data_info)
-        com_lines=loaded['com_lines']
-    json_files=libfi.getfilesbyext(data_c.data_path,'json')
-    for j_file in json_files:
-        r=libfi.path_search(j_file,'({})'.format('|'.join(list(slice_c.key_matcher.keys()))))
-        if r is None:
-            continue
-        class_label=slice_c.class_label[slice_c.key_matcher[r[0]]]
-        file_id=libfi.getfilename(j_file)
-        tar_dir='{model_data_path}/{class_label}/{file_name}'.format(class_label=class_label,file_name=file_id,model_data_path=data_c.model_data_path)
-        if not libfi.exist(tar_dir):
-            libfi.make_dir(tar_dir)
-        com_line='labelme_json_to_dataset {src_file} -o {tar_folder}'.format(
-            src_file=j_file,tar_folder=tar_dir)
-        if com_line not in com_lines:
-            com_lines.append(com_line)
-            print(com_line)
-            os.system(com_line)
-    # np.savez_compressed(data_c.data_info,com_lines=com_lines)
-    print('='*100)
-    data_list=libfi.getfilesbyext(data_c.model_data_path,'png|txt')
-    data_dics={}
-    for f in data_list:
-        folder,file_name,file_ext=libfi.getfiledetails(f)
-        class_label,file_id=folder.split('/')[-2:]
-        id ='{class_label}-{file_id}'.format(class_label=class_label,file_id=file_id).lower()   
-        if id not in data_dics:
-            data_dics[id]=libimg.data_pair(['label_names','img','label'])
-        if file_name in ['label_viz']:
-            continue
-        if file_name=='label_names':
-            file=open(f)
-            'x'.strip('\n')
-            data_dics[id].label_names=list(file.readlines())
-            data_dics[id].label_names=[x.strip('\n') for x in data_dics[id].label_names]
-            file.close()
-        elif file_name=='img':
-            data_dics[id].img=f
-        elif file_name=='label':
-            data_dics[id].label=f
+
+
+# 1. Crop the images and labels to patch image and label
+# 2. Write data info to data_info file
+#       data information   
+#       (1) the dict of origin images
+#       (2) the dict of origin labels
+#           (the number of images, the number of labels may be
+#           different, because some images may not contain any 
+#           lesions, there is no labels for these images)
+#       (3) parms: radius, pyramid, stride, angles
+#       (4) the dict of patch images
+#       (5) the number of patch labels
+
+def _loop_equal(a,b):
+    if type(a)==type(b):
+        if isinstance(a,list) or isinstance(a,tuple) or isinstance(a,set):
+            if len(a)!=len(b):
+            return False
+            _a=sorted(a)
+            _b=sorted(b)
+            for _a_i,_b_i in zip(a,b):
+                if not _loop_equal(_a_i,_b_i):
+                    return False
+        elif isinstance(a,dict):
+            if len(a)!=len(b):
+                return False
+            _key_a=sorted(a.keys())
+            _key_b=sorted(b.keys())
+            if not _loop_equal(_key_a,_key_b):
+                return False
+            else:
+                for k in _key_a:
+                    if not _loop_equal(a[key],b[key]):
+                        return False
         else:
-            print(f)
+            return a==b
+        return True
+    else:
+        return False
 
-        print('processed:',f)
-    # np.savez_compressed(data_c.data_info,com_lines=com_lines,data_dics=data_dics)
-    print('Generated Data Info File:%s'%(data_c.data_info))
-    print('='*100)
-    layer_dict=filte_layer_labels(data_dics)
-    np.savez_compressed(data_c.data_info,com_lines=com_lines,data_dics=data_dics)
-    np.savez_compressed(data_c.data_layer_info,layer_dict=layer_dict)
-    print('normalize labels')
-    print('='*100)
-    normalize_label(layer_dict,layer_c.key_matcher,layer_c.label_dir)
-
-def filte_layer_labels(data_dicts):
-    result_dicts={}
-    for k in data_dicts:
-        label_img=prep.imread(data_dicts[k].label,c=0)
-        if len(set(label_img.flatten()))<layer_c.layer_num-1:
-            continue
-        i=0
-        for l in layer_c.key_matcher.keys():
-            if l in data_dicts[k].label_names:
-                i=i+1
-
-        if i >=layer_c.layer_num-2:
-            print(k)
-            result_dicts[k]=data_dicts[k]
-    return result_dicts        
-
-        
-def normalize_label(dicts,matchers,output_dir):
-    num=max(matchers.items(),key=lambda x:x[1])[1]
-    if not libfi.exist(output_dir):
-        libfi.make_dir(output_dir)
-    for key in dicts:
-        item=dicts[key]
-        label_img=np.asarray(pilm.open(item.label))
-        r_label=np.zeros(shape=label_img.shape[0:2],dtype=np.uint8)
-        for num,s in enumerate(item.label_names):
-            if s in matchers:
-                r_label[label_img==num]=matchers[s]
-        print('{dir}/{key}.{ext}'.format(dir=output_dir,key=key,ext='png'))
-        prep.imwrite('{dir}/{key}.{ext}'.format(dir=output_dir,key=key,ext='png'),r_label)
+ 
+def progress():
+    if not osp.exists(_c.data_info):
+        data_info={}
+    else:
+        loaded=np.load(_c.data_info)
+        data_info=loaded['data_info']
+    
+    need_repatch=False
+    if not need_repatch:
+        key='origin_image_dict'
+        if key not in data_info:
+            need_repatch=True
+        else:
+            _tmp=libfi.getfiledicbyext(_c.origin_image_path,_c.data_ext)
+            if not _loop_equal(_tmp,data_info[key]):
+                need_repatch=True
+    if not need_repatch:
+        key='origin_label_dict'
+        if key not in data_info:
+            need_repatch=True
+        else:
+            _tmp=libfi.getfiledicbyext(_c.origin_label_path,_c.data_ext)
+            if not _loop_equal(_tmp,data_info[key]):
+                need_repatch=True
+    if not need_repatch:
+        key='patch_image_dict'
+        if key not in data_info:
+            need_repatch=True
+        else:
+            _tmp=libfi.getfiledicbyext(_c.patch_image_path,_c.data_ext)
+            if not _loop_equal(_tmp,data_info[key]):
+                need_repatch=True
+    if not need_repatch:
+        key='patch_label_dict'
+        if key not in data_info:
+            need_repatch=True
+        else:
+            _tmp=libfi.getfiledicbyext(_c.patch_label_path,_c.data_ext)
+            if not _loop_equal(_tmp,data_info[key]):
+                need_repatch=True
+    if not need_repatch:
+        key='parms'
+        if key not in data_info:
+            need_repatch=True
+        else:
+            _tmp=dict(radius=_c.radius, pyramids=_c.pyramids, stride=_c.stride, angles=_c.angles)
+            if not _loop_equal(_tmp,data_info[key]):
+                need_repatch=True
+    
+    if need_repatch:
+        # crop origin images to patch images
+        origin_image_dict=libfi.getfiledicbyext(_c.origin_image_path,_c.data_ext)
+        data_info['origin_image_dict']=origin_image_dict
+        origin_label_dict=libfi.getfiledicbyext(_c.origin_label_path,_c.data_ext)
+        data_info['origin_label_dict']=origin_label_dict
+        patch_image_dict={}
+        patch_label_dict={}
+        parms=dict(radius=_c.radius, pyramids=_c.pyramids, stride=_c.stride, angles=_c.angles)
+        data_info['parms']=parms
+        for key in origin_image_dict:
+            image_path=origin_image_dict[key]
+            image=prep.imread(image_path)
+            if key not in origin_label_dict:
+                label_path=None
+            else:
+                label_path=origin_label_dict[key]
+            
+            if label_path is None:
+                label=np.zeros(shape=image.shape[0:2],dtype=np.float)
+            else:
+                label=prep.imread(label_path,c=0)
+            
+            ids=libvi.image_to_blocksinfo(image,
+                radius=parms['radius'],
+                angles=parms['angles'],
+                stride=parms['stride'],
+                pyramid=parms['pyramids'])
+            for _i in ids:
+                p_image=libvi.get_block_fromids(image,_i,block_size=_c.patch_shape)
+                p_label=libvi.get_block_fromids(label,_i,block_size=_c.patch_shape)
+                patch_id='{i.centroid}-{i.radius}-{i.pyramid}-{i.angle}'.format(i=_i)
+                p_image_path='{root}/{key}_{patch_id}.{ext}'.format(
+                    root=_c.patch_image_path,
+                    key=key,
+                    patch_id=patch_id,
+                    ext='png')
+                p_label_path='{root}/{key}_{patch_id}.{ext}'.format(
+                    root=_c.patch_label_path,
+                    key=key,
+                    patch_id=patch_id,
+                    ext='png')
+                prep.imwrite(p_image_path,p_image)
+                prep.imwrite(p_label_path,p_label)
+                print(key,patch_id)
+        data_info['patch_image_dict']=libfi.getfiledicbyext(_c.patch_image_path,_c.data_ext)
+        data_info['patch_label_dict']=libfi.getfiledicbyext(_c.patch_label_path,_c.data_ext)
+        np.savez_compressed(_c.data_info_file,data_info=data_info)
