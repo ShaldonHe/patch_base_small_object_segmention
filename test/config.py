@@ -1,7 +1,7 @@
 import argparse as ag
 import numpy as np
-import model.config as _model_c
-_model_layer=_model_c.parse_args()
+import model.config as _model_con
+_model_c=_model_con.parse_g_args()
 """parsing and configuration"""
 def parse_args():
     desc = "layer segmention test config"
