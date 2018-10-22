@@ -5,8 +5,8 @@ import libs.model.blocks as _bk
 import libs.model.layers as _l
 import libs.model.ops as _op
 from . import config as c
-config_l=c.parse_layer_args()
-
+_c_g=c.parse_g_args()
+_c_d=c.parse_d_args()
 
 def patch_generator(x, is_training):
     # input data shape

@@ -29,6 +29,12 @@ def parse_args():
     # input_shape
     parser.add_argument('--patch_shape', type=list, default=_data_c.patch_shape)
 
+    # parms
+    parser.add_argument('--radius', type=int, default=_data_c.radius,help='block radius')
+    parser.add_argument('--pyramids', type=list, default=_data_c.pyramids)
+    parser.add_argument('--stride', type=int, default=_data_c.stride,help='block stride in train progress')
+    parser.add_argument('--angles', type=list, default=list(range(45,360,45)),help='block angles')
+
     args=parser.parse_args()
     return libci.check_config(args)
 

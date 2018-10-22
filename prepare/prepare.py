@@ -30,7 +30,7 @@ def _loop_equal(a,b):
     if type(a)==type(b):
         if isinstance(a,list) or isinstance(a,tuple) or isinstance(a,set):
             if len(a)!=len(b):
-            return False
+                return False
             _a=sorted(a)
             _b=sorted(b)
             for _a_i,_b_i in zip(a,b):
@@ -54,10 +54,10 @@ def _loop_equal(a,b):
         return False
  
 def progress():
-    if not osp.exists(_c.data_info):
+    if not osp.exists(_c.data_info_file):
         data_info={}
     else:
-        loaded=np.load(_c.data_info)
+        loaded=np.load(_c.data_info_file)
         data_info=loaded['data_info']
     
     need_repatch=False
@@ -125,12 +125,13 @@ def progress():
             else:
                 label=prep.imread(label_path,c=0)
             
-            ids=libvi.image_to_blocksinfo(image,
+            ids,_=libvi.image_to_blocksinfo(image,
                 radius=parms['radius'],
                 angles=parms['angles'],
                 stride=parms['stride'],
                 pyramid=parms['pyramids'])
             for _i in ids:
+                print(_i)
                 p_image=libvi.get_block_fromids(image,_i,block_size=_c.patch_shape)
                 p_label=libvi.get_block_fromids(label,_i,block_size=_c.patch_shape)
                 patch_id='{i.centroid}-{i.radius}-{i.pyramid}-{i.angle}'.format(i=_i)

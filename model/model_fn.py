@@ -4,15 +4,11 @@ from tensorflow.python.training import training
 from model.Nets import patch_generator as g_patch
 from model.Nets import patch_discriminator as d_patch
 from . import config as _c
-_layer_c=_c.parse_args()
+_c_d=_c.parse_d_args()
+_c_g=_c.parse_g_args()
 
 def patch_gan_fn():
     pass
-
-
-
-
-
 
 def Patch_Generator_fn(features, labels, mode, params):
     predict = g_patch(features["images"], mode == tf.estimator.ModeKeys.TRAIN)
