@@ -12,6 +12,8 @@ def parse_args():
     
     # parser.add_argument('--layer_num',type=int,default=_model_g.layer_num)
 
+    parser.add_argument('--prep_size',type=tuple,default=(2048,2048))
+
     # patch data path
     parser.add_argument('--model_image_dir', type=str, default=_data_c.model_image_dir)
     parser.add_argument('--model_label_dir', type=str, default=_data_c.model_label_dir)
@@ -33,7 +35,7 @@ def parse_args():
     parser.add_argument('--radius', type=int, default=_data_c.radius,help='block radius')
     parser.add_argument('--pyramids', type=list, default=_data_c.pyramids)
     parser.add_argument('--stride', type=int, default=_data_c.stride,help='block stride in train progress')
-    parser.add_argument('--angles', type=list, default=list(range(45,360,45)),help='block angles')
+    parser.add_argument('--angles', type=list, default=[0],help='block angles')
 
     args=parser.parse_args()
     return libci.check_config(args)

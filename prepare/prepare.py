@@ -12,8 +12,6 @@ import matplotlib.pyplot as plt
 import libs.common.img_pair_interface as libimg
 import libs.common.view_interface as libvi
 import libs.collection.prep_utility as prep
-
-
 # 1. Crop the images and labels to patch image and label
 # 2. Write data info to data_info file
 #       data information   
@@ -125,28 +123,30 @@ def progress():
             else:
                 label=prep.imread(label_path,c=0)
             
+            image,_=prep.resize_image(image,tar_size=_c.prep_size)
+            label,_=prep.resize_image(label,tar_size=_c.prep_size)
+
             ids,_=libvi.image_to_blocksinfo(image,
                 radius=parms['radius'],
                 angles=parms['angles'],
                 stride=parms['stride'],
                 pyramid=parms['pyramids'])
             for _i in ids:
-                print(_i)
                 p_image=libvi.get_block_fromids(image,_i,block_size=_c.patch_shape)
                 p_label=libvi.get_block_fromids(label,_i,block_size=_c.patch_shape)
-                patch_id='{i.centroid}-{i.radius}-{i.pyramid}-{i.angle}'.format(i=_i)
+                patch_id=_i.get_id()
                 p_image_path='{root}/{key}_{patch_id}.{ext}'.format(
-                    root=_c.patch_image_path,
+                    root=_c.model_image_dir,
                     key=key,
                     patch_id=patch_id,
                     ext='png')
                 p_label_path='{root}/{key}_{patch_id}.{ext}'.format(
-                    root=_c.patch_label_path,
+                    root=_c.model_label_dir,
                     key=key,
                     patch_id=patch_id,
                     ext='png')
-                prep.imwrite(p_image_path,p_image)
-                prep.imwrite(p_label_path,p_label)
+                prep.imwrite(p_image_path,p_image.astype(np.uint8))
+                prep.imwrite(p_label_path,p_label.astype(np.uint8))
                 print(key,patch_id)
         data_info['patch_image_dict']=libfi.getfiledicbyext(_c.patch_image_path,_c.data_ext)
         data_info['patch_label_dict']=libfi.getfiledicbyext(_c.patch_label_path,_c.data_ext)
