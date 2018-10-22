@@ -33,7 +33,7 @@ def patch_generator(x, is_training):
     print('-'*50,'Result Node Name','-'*50)
     print(result.name)
     print('-'*120)
-    return tf.concat(concat_dim=3,[x,result])
+    return tf.concat([x,result],concat_dim=3)
 
 def patch_discriminator(x,is_training):
     # input data shape
