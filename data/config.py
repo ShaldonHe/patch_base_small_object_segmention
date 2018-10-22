@@ -9,8 +9,8 @@ def parse_args():
     desc = "data config"
     parser = ag.ArgumentParser(description=desc)
     
-    parser.add_argument('--origin_image_dir', type=str, default='./data/model/data/origin_image')
-    parser.add_argument('--origin_label_dir', type=str, default='./data/model/data/origin_label')
+    parser.add_argument('--origin_image_dir', type=str, default='/home/xiaodonghe/Documents/Data/CHXD/segmentation/Train/Images/Cropped')
+    parser.add_argument('--origin_label_dir', type=str, default='/home/xiaodonghe/Documents/Data/CHXD/segmentation/Train/Labels/Cropped')
 
     parser.add_argument('--model_image_dir', type=str, default='./data/model/data/prep_image')
     parser.add_argument('--model_label_dir', type=str, default='./data/model/data/prep_label')
