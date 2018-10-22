@@ -29,7 +29,6 @@ def parse_args():
     # input_shape
     parser.add_argument('--patch_shape', type=list, default=_data_c.patch_shape)
 
-    _
     args=parser.parse_args()
     return libci.check_config(args)
 
