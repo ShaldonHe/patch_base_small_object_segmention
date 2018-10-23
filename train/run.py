@@ -7,11 +7,15 @@ import tensorflow.estimator as tfe
 tf.logging.set_verbosity(tf.logging.INFO)
 from . import config as _con
 args=_con.parse_args()
-
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 def norm_progress():
     model_params = {"learning_rate": args.learning_rate,'model_dir':args.model_s_dir}
+    session_config = tf.ConfigProto(log_device_placement=True)
+    session_config.gpu_options.per_process_gpu_memory_fraction = 0.9
     config=tfe.RunConfig(model_dir=args.model_s_dir,save_summary_steps=10)
+    config = config.replace(session_config=session_config)
     network = tf.estimator.Estimator(
         model_fn=model_fn.patch_segmentation_fn,
         model_dir=args.model_s_dir,
