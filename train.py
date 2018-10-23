@@ -6,4 +6,4 @@ import train.run as train
 import prepare.prepare as prep
 tf.logging.set_verbosity(tf.logging.INFO)
 prep.progress()
-train.progress()
+train.norm_progress()

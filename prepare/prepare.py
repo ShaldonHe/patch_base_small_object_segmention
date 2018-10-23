@@ -43,7 +43,7 @@ def _loop_equal(a,b):
                 return False
             else:
                 for k in _key_a:
-                    if not _loop_equal(a[key],b[key]):
+                    if not _loop_equal(a[k],b[k]):
                         return False
         else:
             return a==b
@@ -56,7 +56,7 @@ def progress():
         data_info={}
     else:
         loaded=np.load(_c.data_info_file)
-        data_info=loaded['data_info']
+        data_info=loaded['data_info'].item()
     
     need_repatch=False
     if not need_repatch:
@@ -80,7 +80,7 @@ def progress():
         if key not in data_info:
             need_repatch=True
         else:
-            _tmp=libfi.getfiledicbyext(_c.patch_image_path,_c.data_ext)
+            _tmp=libfi.getfiledicbyext(_c.model_image_dir,_c.data_ext)
             if not _loop_equal(_tmp,data_info[key]):
                 need_repatch=True
     if not need_repatch:
@@ -88,7 +88,7 @@ def progress():
         if key not in data_info:
             need_repatch=True
         else:
-            _tmp=libfi.getfiledicbyext(_c.patch_label_path,_c.data_ext)
+            _tmp=libfi.getfiledicbyext(_c.model_label_dir,_c.data_ext)
             if not _loop_equal(_tmp,data_info[key]):
                 need_repatch=True
     if not need_repatch:
@@ -106,8 +106,6 @@ def progress():
         data_info['origin_image_dict']=origin_image_dict
         origin_label_dict=libfi.getfiledicbyext(_c.origin_label_path,_c.data_ext)
         data_info['origin_label_dict']=origin_label_dict
-        patch_image_dict={}
-        patch_label_dict={}
         parms=dict(radius=_c.radius, pyramids=_c.pyramids, stride=_c.stride, angles=_c.angles)
         data_info['parms']=parms
         for key in origin_image_dict:
@@ -139,7 +137,7 @@ def progress():
                     root=_c.model_image_dir,
                     key=key,
                     patch_id=patch_id,
-                    ext='png')
+                    ext='jpg')
                 p_label_path='{root}/{key}_{patch_id}.{ext}'.format(
                     root=_c.model_label_dir,
                     key=key,
@@ -148,6 +146,6 @@ def progress():
                 prep.imwrite(p_image_path,p_image.astype(np.uint8))
                 prep.imwrite(p_label_path,p_label.astype(np.uint8))
                 print(key,patch_id)
-        data_info['patch_image_dict']=libfi.getfiledicbyext(_c.patch_image_path,_c.data_ext)
-        data_info['patch_label_dict']=libfi.getfiledicbyext(_c.patch_label_path,_c.data_ext)
+        data_info['patch_image_dict']=libfi.getfiledicbyext(_c.model_image_dir,_c.data_ext)
+        data_info['patch_label_dict']=libfi.getfiledicbyext(_c.model_label_dir,_c.data_ext)
         np.savez_compressed(_c.data_info_file,data_info=data_info)
