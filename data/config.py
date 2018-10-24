@@ -37,7 +37,7 @@ def parse_args():
     parser.add_argument('--data_shape', type=list, default=_m_c.input_shape)
     parser.add_argument('--label_shape', type=list, default=_m_c.output_shape)
     parser.add_argument('--layer_num', type=int, default=_m_c.layer_num)
-    parser.add_argument('--train_batch_size', type=int, default=_train.batch_size)
+    parser.add_argument('--train_batch_size', type=int, default=_train.train_batch_size)
     return libci.check_config(parser.parse_args())
 
 

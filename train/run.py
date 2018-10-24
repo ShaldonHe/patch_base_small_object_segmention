@@ -33,37 +33,44 @@ def norm_progress():
 
 def activate_progress():
     import libs.common.data_interface as libdi
-    
+    import libs.model.losses as libms
     model_params = {"learning_rate": args.learning_rate,'model_dir':args.model_s_dir}
     session_config = tf.ConfigProto(log_device_placement=True)
-    session_config.gpu_options.per_process_gpu_memory_fraction = 0.3
+    session_config.gpu_options.per_process_gpu_memory_fraction = 0.9
     config=tfe.RunConfig(model_dir=args.model_s_dir,save_summary_steps=10)
     config = config.replace(session_config=session_config)
     network = tf.estimator.Estimator(model_fn=model_fn.patch_segmentation_fn,model_dir=args.model_s_dir,config=config,params=model_params)
     print(args)
     p=0.5
 
-    # tf.estimator.inputs.numpy_input_fn(
-    # x={"images": data},
-    # y=label,
-    # batch_size=c.train_batch_size,
-    # num_epochs=None,
-    # shuffle=True),data,label
+    # data,label= data_input.MA_segmention_debug_data()
     data,label= data_input.MA_segmention_data()
     rank_list=libdi.rank_list(len(label))
     for epoch in range(args.n_epoch):
         print('num of data:',len(label))
-        print('batch_size:',args.batch_size)
+        print('batch_size:',args.train_batch_size)
         print('n_epoch:',args.n_epoch)
-        print('====train={}/{}=========='.format(epoch,args.n_epoch))
-        network.train(input_fn=input_fn,steps=len(label)//args.batch_size)
-        print('=====eval={}/{}=========='.format(epoch,args.n_epoch))
-        for i in range(len(data)):
-            r=network.predict(input_fn=data[i])
-            print(r)
-            rank_list.update(i,losses)
+        input_fn=tfe.inputs.numpy_input_fn(x={"images":data},y=label,batch_size=args.train_batch_size,shuffle=False)
+        print('==== train:{}/{}=========='.format(epoch,args.n_epoch))
+        network.train(input_fn=input_fn,steps=len(label)//args.train_batch_size)
+        print('===== eval:{}/{}=========='.format(epoch,args.n_epoch))
+
+        data.update_index()
+        label.update_index()
+
+        input_fn=tfe.inputs.numpy_input_fn(x={"images":data},y=label,batch_size=args.eval_batch_size,shuffle=False)
+        r=network.predict(input_fn=input_fn)
+        total_loss=0
+        for i,_r in enumerate(r):
+            l_loss=libms.np_iou_loss(_r['predict'][:,:,0],label[i][0][:,:,0])
+            total_loss+=l_loss
+            rank_list.update(i,l_loss)
         rank_list.sort()
-        print('=========={}/{}=end======'.format(epoch,args.n_epoch))
+        print('eval_loss:{}'.format(total_loss/len(label)))
+        new_index=rank_list.get_top(p)
+        data.update_index(new_index)
+        label.update_index(new_index)
+        print('==========={}/{}=end======'.format(epoch,args.n_epoch))
 
 
 

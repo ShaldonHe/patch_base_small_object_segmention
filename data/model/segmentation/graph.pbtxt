@@ -425,8 +425,8 @@ node {
   }
 }
 node {
-  name: "enqueue_input/random_shuffle_queue"
-  op: "RandomShuffleQueueV2"
+  name: "enqueue_input/fifo_queue"
+  op: "FIFOQueueV2"
   device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
@@ -457,24 +457,6 @@ node {
     key: "container"
     value {
       s: ""
-    }
-  }
-  attr {
-    key: "min_after_dequeue"
-    value {
-      i: 250
-    }
-  }
-  attr {
-    key: "seed"
-    value {
-      i: 0
-    }
-  }
-  attr {
-    key: "seed2"
-    value {
-      i: 0
     }
   }
   attr {
@@ -603,9 +585,9 @@ node {
   }
 }
 node {
-  name: "enqueue_input/random_shuffle_queue_EnqueueMany"
+  name: "enqueue_input/fifo_queue_EnqueueMany"
   op: "QueueEnqueueManyV2"
-  input: "enqueue_input/random_shuffle_queue"
+  input: "enqueue_input/fifo_queue"
   input: "enqueue_input/Placeholder"
   input: "enqueue_input/Placeholder_1"
   input: "enqueue_input/Placeholder_2"
@@ -628,9 +610,9 @@ node {
   }
 }
 node {
-  name: "enqueue_input/random_shuffle_queue_Close"
+  name: "enqueue_input/fifo_queue_Close"
   op: "QueueCloseV2"
-  input: "enqueue_input/random_shuffle_queue"
+  input: "enqueue_input/fifo_queue"
   device: "/device:CPU:0"
   attr {
     key: "cancel_pending_enqueues"
@@ -640,9 +622,9 @@ node {
   }
 }
 node {
-  name: "enqueue_input/random_shuffle_queue_Close_1"
+  name: "enqueue_input/fifo_queue_Close_1"
   op: "QueueCloseV2"
-  input: "enqueue_input/random_shuffle_queue"
+  input: "enqueue_input/fifo_queue"
   device: "/device:CPU:0"
   attr {
     key: "cancel_pending_enqueues"
@@ -652,9 +634,9 @@ node {
   }
 }
 node {
-  name: "enqueue_input/random_shuffle_queue_Size"
+  name: "enqueue_input/fifo_queue_Size"
   op: "QueueSizeV2"
-  input: "enqueue_input/random_shuffle_queue"
+  input: "enqueue_input/fifo_queue"
   device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
@@ -692,7 +674,7 @@ node {
         dtype: DT_INT32
         tensor_shape {
         }
-        int_val: 250
+        int_val: 0
       }
     }
   }
@@ -700,7 +682,7 @@ node {
 node {
   name: "enqueue_input/sub"
   op: "Sub"
-  input: "enqueue_input/random_shuffle_queue_Size"
+  input: "enqueue_input/fifo_queue_Size"
   input: "enqueue_input/sub/y"
   device: "/device:CPU:0"
   attr {
@@ -825,7 +807,7 @@ node {
         dtype: DT_FLOAT
         tensor_shape {
         }
-        float_val: 0.0013333333190530539
+        float_val: 0.0010000000474974513
       }
     }
   }
@@ -853,7 +835,7 @@ node {
   }
 }
 node {
-  name: "enqueue_input/queue/enqueue_input/random_shuffle_queuefraction_over_250_of_750_full/tags"
+  name: "enqueue_input/queue/enqueue_input/fifo_queuefraction_over_0_of_1000_full/tags"
   op: "Const"
   device: "/device:CPU:0"
   attr {
@@ -878,15 +860,15 @@ node {
         dtype: DT_STRING
         tensor_shape {
         }
-        string_val: "enqueue_input/queue/enqueue_input/random_shuffle_queuefraction_over_250_of_750_full"
+        string_val: "enqueue_input/queue/enqueue_input/fifo_queuefraction_over_0_of_1000_full"
       }
     }
   }
 }
 node {
-  name: "enqueue_input/queue/enqueue_input/random_shuffle_queuefraction_over_250_of_750_full"
+  name: "enqueue_input/queue/enqueue_input/fifo_queuefraction_over_0_of_1000_full"
   op: "ScalarSummary"
-  input: "enqueue_input/queue/enqueue_input/random_shuffle_queuefraction_over_250_of_750_full/tags"
+  input: "enqueue_input/queue/enqueue_input/fifo_queuefraction_over_0_of_1000_full/tags"
   input: "enqueue_input/mul"
   device: "/device:CPU:0"
   attr {
@@ -906,7 +888,7 @@ node {
   }
 }
 node {
-  name: "random_shuffle_queue_DequeueMany/n"
+  name: "fifo_queue_DequeueUpTo/n"
   op: "Const"
   device: "/device:CPU:0"
   attr {
@@ -937,10 +919,10 @@ node {
   }
 }
 node {
-  name: "random_shuffle_queue_DequeueMany"
-  op: "QueueDequeueManyV2"
-  input: "enqueue_input/random_shuffle_queue"
-  input: "random_shuffle_queue_DequeueMany/n"
+  name: "fifo_queue_DequeueUpTo"
+  op: "QueueDequeueUpToV2"
+  input: "enqueue_input/fifo_queue"
+  input: "fifo_queue_DequeueUpTo/n"
   device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
@@ -948,12 +930,12 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
         }
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -967,7 +949,7 @@ node {
         }
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -1461,7 +1443,7 @@ node {
 node {
   name: "conv2d/Conv2D"
   op: "Conv2D"
-  input: "random_shuffle_queue_DequeueMany:1"
+  input: "fifo_queue_DequeueUpTo:1"
   input: "conv2d/kernel/read"
   attr {
     key: "T"
@@ -1475,7 +1457,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -2235,7 +2217,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -2335,7 +2317,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -2827,7 +2809,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -3587,7 +3569,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -3687,7 +3669,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -4179,7 +4161,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -4939,7 +4921,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -5039,7 +5021,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -5142,7 +5124,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -5640,7 +5622,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -5713,7 +5695,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -5745,7 +5727,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -6237,7 +6219,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -6997,7 +6979,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -7097,7 +7079,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -7589,7 +7571,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -8349,7 +8331,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -8449,7 +8431,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -8552,7 +8534,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -9050,7 +9032,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -9123,7 +9105,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -9155,7 +9137,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -9647,7 +9629,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -10407,7 +10389,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -10507,7 +10489,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -10999,7 +10981,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -11759,7 +11741,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -11859,7 +11841,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -11962,7 +11944,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -12460,7 +12442,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -12533,7 +12515,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -12565,7 +12547,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -13057,7 +13039,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -13817,7 +13799,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -13917,7 +13899,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -14409,7 +14391,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -15169,7 +15151,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -15269,7 +15251,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 32
@@ -15372,7 +15354,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 32
@@ -15870,7 +15852,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 32
@@ -15943,7 +15925,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 32
@@ -15975,7 +15957,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 32
@@ -16044,7 +16026,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -16126,7 +16108,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -16618,7 +16600,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -17378,7 +17360,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -17478,7 +17460,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -17970,7 +17952,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -18730,7 +18712,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -18830,7 +18812,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -18899,7 +18881,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -18981,7 +18963,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -19473,7 +19455,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -20233,7 +20215,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -20333,7 +20315,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -20825,7 +20807,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -21585,7 +21567,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -21685,7 +21667,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -21754,7 +21736,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -21836,7 +21818,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -22328,7 +22310,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -23088,7 +23070,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -23188,7 +23170,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -23680,7 +23662,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -24440,7 +24422,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -24540,7 +24522,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -24609,7 +24591,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -24691,7 +24673,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -25183,7 +25165,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -25943,7 +25925,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -26043,7 +26025,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -26535,7 +26517,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -27295,7 +27277,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -27395,7 +27377,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -27464,7 +27446,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -27520,7 +27502,7 @@ node {
   name: "concat_4"
   op: "ConcatV2"
   input: "ResizeBicubic_8"
-  input: "random_shuffle_queue_DequeueMany:1"
+  input: "fifo_queue_DequeueUpTo:1"
   input: "concat_4/axis"
   attr {
     key: "N"
@@ -27546,7 +27528,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -28038,7 +28020,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -28798,7 +28780,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -28898,7 +28880,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -29390,7 +29372,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -30150,7 +30132,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -30250,7 +30232,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -30742,7 +30724,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -31502,7 +31484,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -31587,8 +31569,8 @@ node {
   }
 }
 node {
-  name: "Sigmoid"
-  op: "Sigmoid"
+  name: "Relu_19"
+  op: "Relu"
   input: "batch_normalization_19/FusedBatchNorm"
   attr {
     key: "T"
@@ -31602,7 +31584,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -31621,8 +31603,8 @@ node {
 node {
   name: "Mul"
   op: "Mul"
-  input: "Sigmoid"
-  input: "random_shuffle_queue_DequeueMany:2"
+  input: "Relu_19"
+  input: "fifo_queue_DequeueUpTo:2"
   attr {
     key: "T"
     value {
@@ -31635,7 +31617,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -31723,8 +31705,8 @@ node {
 node {
   name: "Add_4"
   op: "Add"
-  input: "Sigmoid"
-  input: "random_shuffle_queue_DequeueMany:2"
+  input: "Relu_19"
+  input: "fifo_queue_DequeueUpTo:2"
   attr {
     key: "T"
     value {
@@ -31737,7 +31719,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -31756,8 +31738,8 @@ node {
 node {
   name: "Mul_1"
   op: "Mul"
-  input: "Sigmoid"
-  input: "random_shuffle_queue_DequeueMany:2"
+  input: "Relu_19"
+  input: "fifo_queue_DequeueUpTo:2"
   attr {
     key: "T"
     value {
@@ -31770,7 +31752,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -31803,7 +31785,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -31889,6 +31871,57 @@ node {
   }
 }
 node {
+  name: "add_5/y"
+  op: "Const"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_FLOAT
+        tensor_shape {
+        }
+        float_val: 9.99999993922529e-09
+      }
+    }
+  }
+}
+node {
+  name: "add_5"
+  op: "Add"
+  input: "Sum_1"
+  input: "add_5/y"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+}
+node {
   name: "Const_2"
   op: "Const"
   attr {
@@ -31922,7 +31955,7 @@ node {
   name: "truediv"
   op: "RealDiv"
   input: "Sum"
-  input: "Sum_1"
+  input: "add_5"
   attr {
     key: "T"
     value {
@@ -32233,7 +32266,7 @@ node {
   name: "gradients/truediv_grad/RealDiv"
   op: "RealDiv"
   input: "gradients/Sub_1_grad/tuple/control_dependency_1"
-  input: "Sum_1"
+  input: "add_5"
   attr {
     key: "T"
     value {
@@ -32335,7 +32368,7 @@ node {
   name: "gradients/truediv_grad/RealDiv_1"
   op: "RealDiv"
   input: "gradients/truediv_grad/Neg"
-  input: "Sum_1"
+  input: "add_5"
   attr {
     key: "T"
     value {
@@ -32356,7 +32389,7 @@ node {
   name: "gradients/truediv_grad/RealDiv_2"
   op: "RealDiv"
   input: "gradients/truediv_grad/RealDiv_1"
-  input: "Sum_1"
+  input: "add_5"
   attr {
     key: "T"
     value {
@@ -32595,8 +32628,15 @@ node {
   }
 }
 node {
-  name: "gradients/Sum_grad/Const"
-  op: "Const"
+  name: "gradients/Sum_grad/Shape"
+  op: "Shape"
+  input: "Mul"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
   attr {
     key: "_output_shapes"
     value {
@@ -32610,23 +32650,9 @@ node {
     }
   }
   attr {
-    key: "dtype"
+    key: "out_type"
     value {
       type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-          dim {
-            size: 4
-          }
-        }
-        tensor_content: "\001\000\000\000\000\002\000\000\000\002\000\000\001\000\000\000"
-      }
     }
   }
 }
@@ -32634,7 +32660,7 @@ node {
   name: "gradients/Sum_grad/Tile"
   op: "Tile"
   input: "gradients/Sum_grad/Reshape"
-  input: "gradients/Sum_grad/Const"
+  input: "gradients/Sum_grad/Shape"
   attr {
     key: "T"
     value {
@@ -32653,7 +32679,457 @@ node {
       list {
         shape {
           dim {
+            size: -1
+          }
+          dim {
+            size: 512
+          }
+          dim {
+            size: 512
+          }
+          dim {
             size: 1
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/add_5_grad/tuple/group_deps"
+  op: "NoOp"
+  input: "^gradients/truediv_grad/tuple/control_dependency_1"
+}
+node {
+  name: "gradients/add_5_grad/tuple/control_dependency"
+  op: "Identity"
+  input: "gradients/truediv_grad/tuple/control_dependency_1"
+  input: "^gradients/add_5_grad/tuple/group_deps"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@gradients/truediv_grad/Reshape_1"
+      }
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/add_5_grad/tuple/control_dependency_1"
+  op: "Identity"
+  input: "gradients/truediv_grad/tuple/control_dependency_1"
+  input: "^gradients/add_5_grad/tuple/group_deps"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@gradients/truediv_grad/Reshape_1"
+      }
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Mul_grad/Shape"
+  op: "Shape"
+  input: "Relu_19"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 4
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "gradients/Mul_grad/Shape_1"
+  op: "Shape"
+  input: "fifo_queue_DequeueUpTo:2"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 4
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "gradients/Mul_grad/BroadcastGradientArgs"
+  op: "BroadcastGradientArgs"
+  input: "gradients/Mul_grad/Shape"
+  input: "gradients/Mul_grad/Shape_1"
+  attr {
+    key: "T"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
+          }
+        }
+        shape {
+          dim {
+            size: -1
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Mul_grad/Mul"
+  op: "Mul"
+  input: "gradients/Sum_grad/Tile"
+  input: "fifo_queue_DequeueUpTo:2"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
+          }
+          dim {
+            size: 512
+          }
+          dim {
+            size: 512
+          }
+          dim {
+            size: 1
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Mul_grad/Sum"
+  op: "Sum"
+  input: "gradients/Mul_grad/Mul"
+  input: "gradients/Mul_grad/BroadcastGradientArgs"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tidx"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          unknown_rank: true
+        }
+      }
+    }
+  }
+  attr {
+    key: "keep_dims"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "gradients/Mul_grad/Reshape"
+  op: "Reshape"
+  input: "gradients/Mul_grad/Sum"
+  input: "gradients/Mul_grad/Shape"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
+          }
+          dim {
+            size: 512
+          }
+          dim {
+            size: 512
+          }
+          dim {
+            size: 1
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Mul_grad/Mul_1"
+  op: "Mul"
+  input: "Relu_19"
+  input: "gradients/Sum_grad/Tile"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
+          }
+          dim {
+            size: 512
+          }
+          dim {
+            size: 512
+          }
+          dim {
+            size: 1
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Mul_grad/Sum_1"
+  op: "Sum"
+  input: "gradients/Mul_grad/Mul_1"
+  input: "gradients/Mul_grad/BroadcastGradientArgs:1"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tidx"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          unknown_rank: true
+        }
+      }
+    }
+  }
+  attr {
+    key: "keep_dims"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "gradients/Mul_grad/Reshape_1"
+  op: "Reshape"
+  input: "gradients/Mul_grad/Sum_1"
+  input: "gradients/Mul_grad/Shape_1"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
+          }
+          dim {
+            size: 512
+          }
+          dim {
+            size: 512
+          }
+          dim {
+            size: 1
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Mul_grad/tuple/group_deps"
+  op: "NoOp"
+  input: "^gradients/Mul_grad/Reshape"
+  input: "^gradients/Mul_grad/Reshape_1"
+}
+node {
+  name: "gradients/Mul_grad/tuple/control_dependency"
+  op: "Identity"
+  input: "gradients/Mul_grad/Reshape"
+  input: "^gradients/Mul_grad/tuple/group_deps"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@gradients/Mul_grad/Reshape"
+      }
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
+          }
+          dim {
+            size: 512
+          }
+          dim {
+            size: 512
+          }
+          dim {
+            size: 1
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Mul_grad/tuple/control_dependency_1"
+  op: "Identity"
+  input: "gradients/Mul_grad/Reshape_1"
+  input: "^gradients/Mul_grad/tuple/group_deps"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@gradients/Mul_grad/Reshape_1"
+      }
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
           }
           dim {
             size: 512
@@ -32708,7 +33184,7 @@ node {
 node {
   name: "gradients/Sum_1_grad/Reshape"
   op: "Reshape"
-  input: "gradients/truediv_grad/tuple/control_dependency_1"
+  input: "gradients/add_5_grad/tuple/control_dependency"
   input: "gradients/Sum_1_grad/Reshape/shape"
   attr {
     key: "T"
@@ -32745,8 +33221,15 @@ node {
   }
 }
 node {
-  name: "gradients/Sum_1_grad/Const"
-  op: "Const"
+  name: "gradients/Sum_1_grad/Shape"
+  op: "Shape"
+  input: "Sub"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
   attr {
     key: "_output_shapes"
     value {
@@ -32760,23 +33243,9 @@ node {
     }
   }
   attr {
-    key: "dtype"
+    key: "out_type"
     value {
       type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-          dim {
-            size: 4
-          }
-        }
-        tensor_content: "\001\000\000\000\000\002\000\000\000\002\000\000\001\000\000\000"
-      }
     }
   }
 }
@@ -32784,7 +33253,7 @@ node {
   name: "gradients/Sum_1_grad/Tile"
   op: "Tile"
   input: "gradients/Sum_1_grad/Reshape"
-  input: "gradients/Sum_1_grad/Const"
+  input: "gradients/Sum_1_grad/Shape"
   attr {
     key: "T"
     value {
@@ -32803,7 +33272,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -32820,10 +33289,9 @@ node {
   }
 }
 node {
-  name: "gradients/Mul_grad/Mul"
-  op: "Mul"
-  input: "gradients/Sum_grad/Tile"
-  input: "random_shuffle_queue_DequeueMany:2"
+  name: "gradients/Sub_grad/Shape"
+  op: "Shape"
+  input: "Add_4"
   attr {
     key: "T"
     value {
@@ -32836,27 +33304,23 @@ node {
       list {
         shape {
           dim {
-            size: 1
-          }
-          dim {
-            size: 512
-          }
-          dim {
-            size: 512
-          }
-          dim {
-            size: 1
+            size: 4
           }
         }
       }
     }
   }
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
 }
 node {
-  name: "gradients/Mul_grad/Mul_1"
-  op: "Mul"
-  input: "gradients/Sum_grad/Tile"
-  input: "Sigmoid"
+  name: "gradients/Sub_grad/Shape_1"
+  op: "Shape"
+  input: "Mul_1"
   attr {
     key: "T"
     value {
@@ -32869,45 +33333,28 @@ node {
       list {
         shape {
           dim {
-            size: 1
-          }
-          dim {
-            size: 512
-          }
-          dim {
-            size: 512
-          }
-          dim {
-            size: 1
+            size: 4
           }
         }
       }
     }
   }
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
 }
 node {
-  name: "gradients/Mul_grad/tuple/group_deps"
-  op: "NoOp"
-  input: "^gradients/Mul_grad/Mul"
-  input: "^gradients/Mul_grad/Mul_1"
-}
-node {
-  name: "gradients/Mul_grad/tuple/control_dependency"
-  op: "Identity"
-  input: "gradients/Mul_grad/Mul"
-  input: "^gradients/Mul_grad/tuple/group_deps"
+  name: "gradients/Sub_grad/BroadcastGradientArgs"
+  op: "BroadcastGradientArgs"
+  input: "gradients/Sub_grad/Shape"
+  input: "gradients/Sub_grad/Shape_1"
   attr {
     key: "T"
     value {
-      type: DT_FLOAT
-    }
-  }
-  attr {
-    key: "_class"
-    value {
-      list {
-        s: "loc:@gradients/Mul_grad/Mul"
-      }
+      type: DT_INT32
     }
   }
   attr {
@@ -32916,7 +33363,76 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
+          }
+        }
+        shape {
+          dim {
+            size: -1
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Sub_grad/Sum"
+  op: "Sum"
+  input: "gradients/Sum_1_grad/Tile"
+  input: "gradients/Sub_grad/BroadcastGradientArgs"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tidx"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          unknown_rank: true
+        }
+      }
+    }
+  }
+  attr {
+    key: "keep_dims"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "gradients/Sub_grad/Reshape"
+  op: "Reshape"
+  input: "gradients/Sub_grad/Sum"
+  input: "gradients/Sub_grad/Shape"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
           }
           dim {
             size: 512
@@ -32933,10 +33449,10 @@ node {
   }
 }
 node {
-  name: "gradients/Mul_grad/tuple/control_dependency_1"
-  op: "Identity"
-  input: "gradients/Mul_grad/Mul_1"
-  input: "^gradients/Mul_grad/tuple/group_deps"
+  name: "gradients/Sub_grad/Sum_1"
+  op: "Sum"
+  input: "gradients/Sum_1_grad/Tile"
+  input: "gradients/Sub_grad/BroadcastGradientArgs:1"
   attr {
     key: "T"
     value {
@@ -32944,11 +33460,9 @@ node {
     }
   }
   attr {
-    key: "_class"
+    key: "Tidx"
     value {
-      list {
-        s: "loc:@gradients/Mul_grad/Mul_1"
-      }
+      type: DT_INT32
     }
   }
   attr {
@@ -32956,27 +33470,22 @@ node {
     value {
       list {
         shape {
-          dim {
-            size: 1
-          }
-          dim {
-            size: 512
-          }
-          dim {
-            size: 512
-          }
-          dim {
-            size: 1
-          }
+          unknown_rank: true
         }
       }
+    }
+  }
+  attr {
+    key: "keep_dims"
+    value {
+      b: false
     }
   }
 }
 node {
   name: "gradients/Sub_grad/Neg"
   op: "Neg"
-  input: "gradients/Sum_1_grad/Tile"
+  input: "gradients/Sub_grad/Sum_1"
   attr {
     key: "T"
     value {
@@ -32988,8 +33497,36 @@ node {
     value {
       list {
         shape {
+          unknown_rank: true
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Sub_grad/Reshape_1"
+  op: "Reshape"
+  input: "gradients/Sub_grad/Neg"
+  input: "gradients/Sub_grad/Shape_1"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -33008,13 +33545,13 @@ node {
 node {
   name: "gradients/Sub_grad/tuple/group_deps"
   op: "NoOp"
-  input: "^gradients/Sub_grad/Neg"
-  input: "^gradients/Sum_1_grad/Tile"
+  input: "^gradients/Sub_grad/Reshape"
+  input: "^gradients/Sub_grad/Reshape_1"
 }
 node {
   name: "gradients/Sub_grad/tuple/control_dependency"
   op: "Identity"
-  input: "gradients/Sum_1_grad/Tile"
+  input: "gradients/Sub_grad/Reshape"
   input: "^gradients/Sub_grad/tuple/group_deps"
   attr {
     key: "T"
@@ -33026,7 +33563,7 @@ node {
     key: "_class"
     value {
       list {
-        s: "loc:@gradients/Sum_1_grad/Tile"
+        s: "loc:@gradients/Sub_grad/Reshape"
       }
     }
   }
@@ -33036,7 +33573,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -33055,7 +33592,7 @@ node {
 node {
   name: "gradients/Sub_grad/tuple/control_dependency_1"
   op: "Identity"
-  input: "gradients/Sub_grad/Neg"
+  input: "gradients/Sub_grad/Reshape_1"
   input: "^gradients/Sub_grad/tuple/group_deps"
   attr {
     key: "T"
@@ -33067,7 +33604,7 @@ node {
     key: "_class"
     value {
       list {
-        s: "loc:@gradients/Sub_grad/Neg"
+        s: "loc:@gradients/Sub_grad/Reshape_1"
       }
     }
   }
@@ -33077,7 +33614,240 @@ node {
       list {
         shape {
           dim {
+            size: -1
+          }
+          dim {
+            size: 512
+          }
+          dim {
+            size: 512
+          }
+          dim {
             size: 1
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Add_4_grad/Shape"
+  op: "Shape"
+  input: "Relu_19"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 4
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "gradients/Add_4_grad/Shape_1"
+  op: "Shape"
+  input: "fifo_queue_DequeueUpTo:2"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 4
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "gradients/Add_4_grad/BroadcastGradientArgs"
+  op: "BroadcastGradientArgs"
+  input: "gradients/Add_4_grad/Shape"
+  input: "gradients/Add_4_grad/Shape_1"
+  attr {
+    key: "T"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
+          }
+        }
+        shape {
+          dim {
+            size: -1
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Add_4_grad/Sum"
+  op: "Sum"
+  input: "gradients/Sub_grad/tuple/control_dependency"
+  input: "gradients/Add_4_grad/BroadcastGradientArgs"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tidx"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          unknown_rank: true
+        }
+      }
+    }
+  }
+  attr {
+    key: "keep_dims"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "gradients/Add_4_grad/Reshape"
+  op: "Reshape"
+  input: "gradients/Add_4_grad/Sum"
+  input: "gradients/Add_4_grad/Shape"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
+          }
+          dim {
+            size: 512
+          }
+          dim {
+            size: 512
+          }
+          dim {
+            size: 1
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Add_4_grad/Sum_1"
+  op: "Sum"
+  input: "gradients/Sub_grad/tuple/control_dependency"
+  input: "gradients/Add_4_grad/BroadcastGradientArgs:1"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tidx"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          unknown_rank: true
+        }
+      }
+    }
+  }
+  attr {
+    key: "keep_dims"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "gradients/Add_4_grad/Reshape_1"
+  op: "Reshape"
+  input: "gradients/Add_4_grad/Sum_1"
+  input: "gradients/Add_4_grad/Shape_1"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
           }
           dim {
             size: 512
@@ -33096,12 +33866,13 @@ node {
 node {
   name: "gradients/Add_4_grad/tuple/group_deps"
   op: "NoOp"
-  input: "^gradients/Sub_grad/tuple/control_dependency"
+  input: "^gradients/Add_4_grad/Reshape"
+  input: "^gradients/Add_4_grad/Reshape_1"
 }
 node {
   name: "gradients/Add_4_grad/tuple/control_dependency"
   op: "Identity"
-  input: "gradients/Sub_grad/tuple/control_dependency"
+  input: "gradients/Add_4_grad/Reshape"
   input: "^gradients/Add_4_grad/tuple/group_deps"
   attr {
     key: "T"
@@ -33113,7 +33884,7 @@ node {
     key: "_class"
     value {
       list {
-        s: "loc:@gradients/Sum_1_grad/Tile"
+        s: "loc:@gradients/Add_4_grad/Reshape"
       }
     }
   }
@@ -33123,7 +33894,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -33142,7 +33913,7 @@ node {
 node {
   name: "gradients/Add_4_grad/tuple/control_dependency_1"
   op: "Identity"
-  input: "gradients/Sub_grad/tuple/control_dependency"
+  input: "gradients/Add_4_grad/Reshape_1"
   input: "^gradients/Add_4_grad/tuple/group_deps"
   attr {
     key: "T"
@@ -33154,7 +33925,7 @@ node {
     key: "_class"
     value {
       list {
-        s: "loc:@gradients/Sum_1_grad/Tile"
+        s: "loc:@gradients/Add_4_grad/Reshape_1"
       }
     }
   }
@@ -33164,7 +33935,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -33181,10 +33952,9 @@ node {
   }
 }
 node {
-  name: "gradients/Mul_1_grad/Mul"
-  op: "Mul"
-  input: "gradients/Sub_grad/tuple/control_dependency_1"
-  input: "random_shuffle_queue_DequeueMany:2"
+  name: "gradients/Mul_1_grad/Shape"
+  op: "Shape"
+  input: "Relu_19"
   attr {
     key: "T"
     value {
@@ -33197,7 +33967,168 @@ node {
       list {
         shape {
           dim {
+            size: 4
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "gradients/Mul_1_grad/Shape_1"
+  op: "Shape"
+  input: "fifo_queue_DequeueUpTo:2"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 4
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "gradients/Mul_1_grad/BroadcastGradientArgs"
+  op: "BroadcastGradientArgs"
+  input: "gradients/Mul_1_grad/Shape"
+  input: "gradients/Mul_1_grad/Shape_1"
+  attr {
+    key: "T"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
+          }
+        }
+        shape {
+          dim {
+            size: -1
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Mul_1_grad/Mul"
+  op: "Mul"
+  input: "gradients/Sub_grad/tuple/control_dependency_1"
+  input: "fifo_queue_DequeueUpTo:2"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
+          }
+          dim {
+            size: 512
+          }
+          dim {
+            size: 512
+          }
+          dim {
             size: 1
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Mul_1_grad/Sum"
+  op: "Sum"
+  input: "gradients/Mul_1_grad/Mul"
+  input: "gradients/Mul_1_grad/BroadcastGradientArgs"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tidx"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          unknown_rank: true
+        }
+      }
+    }
+  }
+  attr {
+    key: "keep_dims"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "gradients/Mul_1_grad/Reshape"
+  op: "Reshape"
+  input: "gradients/Mul_1_grad/Sum"
+  input: "gradients/Mul_1_grad/Shape"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
           }
           dim {
             size: 512
@@ -33216,8 +34147,8 @@ node {
 node {
   name: "gradients/Mul_1_grad/Mul_1"
   op: "Mul"
+  input: "Relu_19"
   input: "gradients/Sub_grad/tuple/control_dependency_1"
-  input: "Sigmoid"
   attr {
     key: "T"
     value {
@@ -33230,7 +34161,80 @@ node {
       list {
         shape {
           dim {
+            size: -1
+          }
+          dim {
+            size: 512
+          }
+          dim {
+            size: 512
+          }
+          dim {
             size: 1
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Mul_1_grad/Sum_1"
+  op: "Sum"
+  input: "gradients/Mul_1_grad/Mul_1"
+  input: "gradients/Mul_1_grad/BroadcastGradientArgs:1"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tidx"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          unknown_rank: true
+        }
+      }
+    }
+  }
+  attr {
+    key: "keep_dims"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "gradients/Mul_1_grad/Reshape_1"
+  op: "Reshape"
+  input: "gradients/Mul_1_grad/Sum_1"
+  input: "gradients/Mul_1_grad/Shape_1"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
           }
           dim {
             size: 512
@@ -33249,13 +34253,13 @@ node {
 node {
   name: "gradients/Mul_1_grad/tuple/group_deps"
   op: "NoOp"
-  input: "^gradients/Mul_1_grad/Mul"
-  input: "^gradients/Mul_1_grad/Mul_1"
+  input: "^gradients/Mul_1_grad/Reshape"
+  input: "^gradients/Mul_1_grad/Reshape_1"
 }
 node {
   name: "gradients/Mul_1_grad/tuple/control_dependency"
   op: "Identity"
-  input: "gradients/Mul_1_grad/Mul"
+  input: "gradients/Mul_1_grad/Reshape"
   input: "^gradients/Mul_1_grad/tuple/group_deps"
   attr {
     key: "T"
@@ -33267,7 +34271,7 @@ node {
     key: "_class"
     value {
       list {
-        s: "loc:@gradients/Mul_1_grad/Mul"
+        s: "loc:@gradients/Mul_1_grad/Reshape"
       }
     }
   }
@@ -33277,7 +34281,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -33296,7 +34300,7 @@ node {
 node {
   name: "gradients/Mul_1_grad/tuple/control_dependency_1"
   op: "Identity"
-  input: "gradients/Mul_1_grad/Mul_1"
+  input: "gradients/Mul_1_grad/Reshape_1"
   input: "^gradients/Mul_1_grad/tuple/group_deps"
   attr {
     key: "T"
@@ -33308,7 +34312,7 @@ node {
     key: "_class"
     value {
       list {
-        s: "loc:@gradients/Mul_1_grad/Mul_1"
+        s: "loc:@gradients/Mul_1_grad/Reshape_1"
       }
     }
   }
@@ -33318,7 +34322,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -33356,7 +34360,7 @@ node {
     key: "_class"
     value {
       list {
-        s: "loc:@gradients/Mul_grad/Mul"
+        s: "loc:@gradients/Mul_grad/Reshape"
       }
     }
   }
@@ -33366,7 +34370,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -33383,10 +34387,10 @@ node {
   }
 }
 node {
-  name: "gradients/Sigmoid_grad/SigmoidGrad"
-  op: "SigmoidGrad"
-  input: "Sigmoid"
+  name: "gradients/Relu_19_grad/ReluGrad"
+  op: "ReluGrad"
   input: "gradients/AddN"
+  input: "Relu_19"
   attr {
     key: "T"
     value {
@@ -33399,7 +34403,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -33510,7 +34514,7 @@ node {
 node {
   name: "gradients/batch_normalization_19/FusedBatchNorm_grad/FusedBatchNormGrad"
   op: "FusedBatchNormGrad"
-  input: "gradients/Sigmoid_grad/SigmoidGrad"
+  input: "gradients/Relu_19_grad/ReluGrad"
   input: "conv2d_23/Conv2D"
   input: "batch_normalization_19/gamma/read"
   input: "batch_normalization_19/moving_mean/read"
@@ -33527,7 +34531,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -33611,7 +34615,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -33911,7 +34915,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -33985,7 +34989,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -34113,7 +35117,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -34197,7 +35201,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -34497,7 +35501,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -34571,7 +35575,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -34699,7 +35703,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -34783,7 +35787,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -35083,7 +36087,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -35193,7 +36197,14 @@ node {
 }
 node {
   name: "gradients/concat_4_grad/Shape"
-  op: "Const"
+  op: "Shape"
+  input: "ResizeBicubic_8"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
   attr {
     key: "_output_shapes"
     value {
@@ -35207,29 +36218,29 @@ node {
     }
   }
   attr {
-    key: "dtype"
+    key: "out_type"
     value {
       type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-          dim {
-            size: 4
-          }
-        }
-        tensor_content: "\001\000\000\000\000\002\000\000\000\002\000\000\020\000\000\000"
-      }
     }
   }
 }
 node {
-  name: "gradients/concat_4_grad/Shape_1"
-  op: "Const"
+  name: "gradients/concat_4_grad/ShapeN"
+  op: "ShapeN"
+  input: "ResizeBicubic_8"
+  input: "fifo_queue_DequeueUpTo:1"
+  attr {
+    key: "N"
+    value {
+      i: 2
+    }
+  }
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
   attr {
     key: "_output_shapes"
     value {
@@ -35239,27 +36250,18 @@ node {
             size: 4
           }
         }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
+        shape {
           dim {
             size: 4
           }
         }
-        tensor_content: "\001\000\000\000\000\002\000\000\000\002\000\000\003\000\000\000"
       }
+    }
+  }
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
     }
   }
 }
@@ -35267,8 +36269,8 @@ node {
   name: "gradients/concat_4_grad/ConcatOffset"
   op: "ConcatOffset"
   input: "gradients/concat_4_grad/mod"
-  input: "gradients/concat_4_grad/Shape"
-  input: "gradients/concat_4_grad/Shape_1"
+  input: "gradients/concat_4_grad/ShapeN"
+  input: "gradients/concat_4_grad/ShapeN:1"
   attr {
     key: "N"
     value {
@@ -35298,7 +36300,7 @@ node {
   op: "Slice"
   input: "gradients/conv2d_21/Conv2D_grad/tuple/control_dependency"
   input: "gradients/concat_4_grad/ConcatOffset"
-  input: "gradients/concat_4_grad/Shape"
+  input: "gradients/concat_4_grad/ShapeN"
   attr {
     key: "Index"
     value {
@@ -35317,16 +36319,16 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
-            size: 512
+            size: -1
           }
           dim {
-            size: 512
+            size: -1
           }
           dim {
-            size: 16
+            size: -1
           }
         }
       }
@@ -35338,7 +36340,7 @@ node {
   op: "Slice"
   input: "gradients/conv2d_21/Conv2D_grad/tuple/control_dependency"
   input: "gradients/concat_4_grad/ConcatOffset:1"
-  input: "gradients/concat_4_grad/Shape_1"
+  input: "gradients/concat_4_grad/ShapeN:1"
   attr {
     key: "Index"
     value {
@@ -35357,16 +36359,16 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
-            size: 512
+            size: -1
           }
           dim {
-            size: 512
+            size: -1
           }
           dim {
-            size: 3
+            size: -1
           }
         }
       }
@@ -35404,7 +36406,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -35445,7 +36447,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -35478,7 +36480,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -35517,7 +36519,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -35645,7 +36647,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -35729,7 +36731,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -36029,7 +37031,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -36103,7 +37105,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -36231,7 +37233,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -36315,7 +37317,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -36615,7 +37617,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -36725,7 +37727,14 @@ node {
 }
 node {
   name: "gradients/concat_3_grad/Shape"
-  op: "Const"
+  op: "Shape"
+  input: "ResizeBicubic_7"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
   attr {
     key: "_output_shapes"
     value {
@@ -36739,29 +37748,29 @@ node {
     }
   }
   attr {
-    key: "dtype"
+    key: "out_type"
     value {
       type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-          dim {
-            size: 4
-          }
-        }
-        tensor_content: "\001\000\000\000\000\002\000\000\000\002\000\000 \000\000\000"
-      }
     }
   }
 }
 node {
-  name: "gradients/concat_3_grad/Shape_1"
-  op: "Const"
+  name: "gradients/concat_3_grad/ShapeN"
+  op: "ShapeN"
+  input: "ResizeBicubic_7"
+  input: "Relu"
+  attr {
+    key: "N"
+    value {
+      i: 2
+    }
+  }
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
   attr {
     key: "_output_shapes"
     value {
@@ -36771,27 +37780,18 @@ node {
             size: 4
           }
         }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
+        shape {
           dim {
             size: 4
           }
         }
-        tensor_content: "\001\000\000\000\000\002\000\000\000\002\000\000\020\000\000\000"
       }
+    }
+  }
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
     }
   }
 }
@@ -36799,8 +37799,8 @@ node {
   name: "gradients/concat_3_grad/ConcatOffset"
   op: "ConcatOffset"
   input: "gradients/concat_3_grad/mod"
-  input: "gradients/concat_3_grad/Shape"
-  input: "gradients/concat_3_grad/Shape_1"
+  input: "gradients/concat_3_grad/ShapeN"
+  input: "gradients/concat_3_grad/ShapeN:1"
   attr {
     key: "N"
     value {
@@ -36830,7 +37830,7 @@ node {
   op: "Slice"
   input: "gradients/conv2d_19/Conv2D_grad/tuple/control_dependency"
   input: "gradients/concat_3_grad/ConcatOffset"
-  input: "gradients/concat_3_grad/Shape"
+  input: "gradients/concat_3_grad/ShapeN"
   attr {
     key: "Index"
     value {
@@ -36849,16 +37849,16 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
-            size: 512
+            size: -1
           }
           dim {
-            size: 512
+            size: -1
           }
           dim {
-            size: 32
+            size: -1
           }
         }
       }
@@ -36870,7 +37870,7 @@ node {
   op: "Slice"
   input: "gradients/conv2d_19/Conv2D_grad/tuple/control_dependency"
   input: "gradients/concat_3_grad/ConcatOffset:1"
-  input: "gradients/concat_3_grad/Shape_1"
+  input: "gradients/concat_3_grad/ShapeN:1"
   attr {
     key: "Index"
     value {
@@ -36889,16 +37889,16 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
-            size: 512
+            size: -1
           }
           dim {
-            size: 512
+            size: -1
           }
           dim {
-            size: 16
+            size: -1
           }
         }
       }
@@ -36936,7 +37936,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -36977,7 +37977,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -37010,7 +38010,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -37049,7 +38049,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -37177,7 +38177,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -37261,7 +38261,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -37561,7 +38561,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -37635,7 +38635,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -37763,7 +38763,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -37847,7 +38847,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -38147,7 +39147,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -38257,7 +39257,14 @@ node {
 }
 node {
   name: "gradients/concat_2_grad/Shape"
-  op: "Const"
+  op: "Shape"
+  input: "ResizeBicubic_6"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
   attr {
     key: "_output_shapes"
     value {
@@ -38271,29 +39278,29 @@ node {
     }
   }
   attr {
-    key: "dtype"
+    key: "out_type"
     value {
       type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-          dim {
-            size: 4
-          }
-        }
-        tensor_content: "\001\000\000\000\000\001\000\000\000\001\000\000@\000\000\000"
-      }
     }
   }
 }
 node {
-  name: "gradients/concat_2_grad/Shape_1"
-  op: "Const"
+  name: "gradients/concat_2_grad/ShapeN"
+  op: "ShapeN"
+  input: "ResizeBicubic_6"
+  input: "Relu_2"
+  attr {
+    key: "N"
+    value {
+      i: 2
+    }
+  }
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
   attr {
     key: "_output_shapes"
     value {
@@ -38303,27 +39310,18 @@ node {
             size: 4
           }
         }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
+        shape {
           dim {
             size: 4
           }
         }
-        tensor_content: "\001\000\000\000\000\001\000\000\000\001\000\000 \000\000\000"
       }
+    }
+  }
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
     }
   }
 }
@@ -38331,8 +39329,8 @@ node {
   name: "gradients/concat_2_grad/ConcatOffset"
   op: "ConcatOffset"
   input: "gradients/concat_2_grad/mod"
-  input: "gradients/concat_2_grad/Shape"
-  input: "gradients/concat_2_grad/Shape_1"
+  input: "gradients/concat_2_grad/ShapeN"
+  input: "gradients/concat_2_grad/ShapeN:1"
   attr {
     key: "N"
     value {
@@ -38362,7 +39360,7 @@ node {
   op: "Slice"
   input: "gradients/conv2d_17/Conv2D_grad/tuple/control_dependency"
   input: "gradients/concat_2_grad/ConcatOffset"
-  input: "gradients/concat_2_grad/Shape"
+  input: "gradients/concat_2_grad/ShapeN"
   attr {
     key: "Index"
     value {
@@ -38381,16 +39379,16 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
-            size: 256
+            size: -1
           }
           dim {
-            size: 256
+            size: -1
           }
           dim {
-            size: 64
+            size: -1
           }
         }
       }
@@ -38402,7 +39400,7 @@ node {
   op: "Slice"
   input: "gradients/conv2d_17/Conv2D_grad/tuple/control_dependency"
   input: "gradients/concat_2_grad/ConcatOffset:1"
-  input: "gradients/concat_2_grad/Shape_1"
+  input: "gradients/concat_2_grad/ShapeN:1"
   attr {
     key: "Index"
     value {
@@ -38421,16 +39419,16 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
-            size: 256
+            size: -1
           }
           dim {
-            size: 256
+            size: -1
           }
           dim {
-            size: 32
+            size: -1
           }
         }
       }
@@ -38468,7 +39466,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -38509,7 +39507,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -38542,7 +39540,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -38581,7 +39579,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -38709,7 +39707,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -38793,7 +39791,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -39093,7 +40091,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -39167,7 +40165,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -39295,7 +40293,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -39379,7 +40377,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -39679,7 +40677,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -39789,7 +40787,14 @@ node {
 }
 node {
   name: "gradients/concat_1_grad/Shape"
-  op: "Const"
+  op: "Shape"
+  input: "ResizeBicubic_5"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
   attr {
     key: "_output_shapes"
     value {
@@ -39803,29 +40808,29 @@ node {
     }
   }
   attr {
-    key: "dtype"
+    key: "out_type"
     value {
       type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-          dim {
-            size: 4
-          }
-        }
-        tensor_content: "\001\000\000\000\200\000\000\000\200\000\000\000\200\000\000\000"
-      }
     }
   }
 }
 node {
-  name: "gradients/concat_1_grad/Shape_1"
-  op: "Const"
+  name: "gradients/concat_1_grad/ShapeN"
+  op: "ShapeN"
+  input: "ResizeBicubic_5"
+  input: "Relu_4"
+  attr {
+    key: "N"
+    value {
+      i: 2
+    }
+  }
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
   attr {
     key: "_output_shapes"
     value {
@@ -39835,27 +40840,18 @@ node {
             size: 4
           }
         }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
+        shape {
           dim {
             size: 4
           }
         }
-        tensor_content: "\001\000\000\000\200\000\000\000\200\000\000\000@\000\000\000"
       }
+    }
+  }
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
     }
   }
 }
@@ -39863,8 +40859,8 @@ node {
   name: "gradients/concat_1_grad/ConcatOffset"
   op: "ConcatOffset"
   input: "gradients/concat_1_grad/mod"
-  input: "gradients/concat_1_grad/Shape"
-  input: "gradients/concat_1_grad/Shape_1"
+  input: "gradients/concat_1_grad/ShapeN"
+  input: "gradients/concat_1_grad/ShapeN:1"
   attr {
     key: "N"
     value {
@@ -39894,7 +40890,7 @@ node {
   op: "Slice"
   input: "gradients/conv2d_15/Conv2D_grad/tuple/control_dependency"
   input: "gradients/concat_1_grad/ConcatOffset"
-  input: "gradients/concat_1_grad/Shape"
+  input: "gradients/concat_1_grad/ShapeN"
   attr {
     key: "Index"
     value {
@@ -39913,16 +40909,16 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
-            size: 128
+            size: -1
           }
           dim {
-            size: 128
+            size: -1
           }
           dim {
-            size: 128
+            size: -1
           }
         }
       }
@@ -39934,7 +40930,7 @@ node {
   op: "Slice"
   input: "gradients/conv2d_15/Conv2D_grad/tuple/control_dependency"
   input: "gradients/concat_1_grad/ConcatOffset:1"
-  input: "gradients/concat_1_grad/Shape_1"
+  input: "gradients/concat_1_grad/ShapeN:1"
   attr {
     key: "Index"
     value {
@@ -39953,16 +40949,16 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
-            size: 128
+            size: -1
           }
           dim {
-            size: 128
+            size: -1
           }
           dim {
-            size: 64
+            size: -1
           }
         }
       }
@@ -40000,7 +40996,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -40041,7 +41037,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -40074,7 +41070,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -40113,7 +41109,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -40241,7 +41237,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -40325,7 +41321,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -40625,7 +41621,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -40699,7 +41695,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -40827,7 +41823,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -40911,7 +41907,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -41211,7 +42207,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -41321,7 +42317,14 @@ node {
 }
 node {
   name: "gradients/concat_grad/Shape"
-  op: "Const"
+  op: "Shape"
+  input: "ResizeBicubic_4"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
   attr {
     key: "_output_shapes"
     value {
@@ -41335,29 +42338,29 @@ node {
     }
   }
   attr {
-    key: "dtype"
+    key: "out_type"
     value {
       type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-          dim {
-            size: 4
-          }
-        }
-        tensor_content: "\001\000\000\000@\000\000\000@\000\000\000\000\001\000\000"
-      }
     }
   }
 }
 node {
-  name: "gradients/concat_grad/Shape_1"
-  op: "Const"
+  name: "gradients/concat_grad/ShapeN"
+  op: "ShapeN"
+  input: "ResizeBicubic_4"
+  input: "Relu_6"
+  attr {
+    key: "N"
+    value {
+      i: 2
+    }
+  }
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
   attr {
     key: "_output_shapes"
     value {
@@ -41367,27 +42370,18 @@ node {
             size: 4
           }
         }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
+        shape {
           dim {
             size: 4
           }
         }
-        tensor_content: "\001\000\000\000@\000\000\000@\000\000\000\200\000\000\000"
       }
+    }
+  }
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
     }
   }
 }
@@ -41395,8 +42389,8 @@ node {
   name: "gradients/concat_grad/ConcatOffset"
   op: "ConcatOffset"
   input: "gradients/concat_grad/mod"
-  input: "gradients/concat_grad/Shape"
-  input: "gradients/concat_grad/Shape_1"
+  input: "gradients/concat_grad/ShapeN"
+  input: "gradients/concat_grad/ShapeN:1"
   attr {
     key: "N"
     value {
@@ -41426,7 +42420,7 @@ node {
   op: "Slice"
   input: "gradients/conv2d_13/Conv2D_grad/tuple/control_dependency"
   input: "gradients/concat_grad/ConcatOffset"
-  input: "gradients/concat_grad/Shape"
+  input: "gradients/concat_grad/ShapeN"
   attr {
     key: "Index"
     value {
@@ -41445,16 +42439,16 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
-            size: 64
+            size: -1
           }
           dim {
-            size: 64
+            size: -1
           }
           dim {
-            size: 256
+            size: -1
           }
         }
       }
@@ -41466,7 +42460,7 @@ node {
   op: "Slice"
   input: "gradients/conv2d_13/Conv2D_grad/tuple/control_dependency"
   input: "gradients/concat_grad/ConcatOffset:1"
-  input: "gradients/concat_grad/Shape_1"
+  input: "gradients/concat_grad/ShapeN:1"
   attr {
     key: "Index"
     value {
@@ -41485,16 +42479,16 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
-            size: 64
+            size: -1
           }
           dim {
-            size: 64
+            size: -1
           }
           dim {
-            size: 128
+            size: -1
           }
         }
       }
@@ -41532,7 +42526,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -41573,7 +42567,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -41606,7 +42600,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 32
@@ -41645,7 +42639,240 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
+          }
+          dim {
+            size: 32
+          }
+          dim {
+            size: 32
+          }
+          dim {
+            size: 256
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Add_3_grad/Shape"
+  op: "Shape"
+  input: "conv2d_12/Conv2D"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 4
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "gradients/Add_3_grad/Shape_1"
+  op: "Shape"
+  input: "max_pooling2d_3/MaxPool"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 4
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "gradients/Add_3_grad/BroadcastGradientArgs"
+  op: "BroadcastGradientArgs"
+  input: "gradients/Add_3_grad/Shape"
+  input: "gradients/Add_3_grad/Shape_1"
+  attr {
+    key: "T"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
+          }
+        }
+        shape {
+          dim {
+            size: -1
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Add_3_grad/Sum"
+  op: "Sum"
+  input: "gradients/Relu_8_grad/ReluGrad"
+  input: "gradients/Add_3_grad/BroadcastGradientArgs"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tidx"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          unknown_rank: true
+        }
+      }
+    }
+  }
+  attr {
+    key: "keep_dims"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "gradients/Add_3_grad/Reshape"
+  op: "Reshape"
+  input: "gradients/Add_3_grad/Sum"
+  input: "gradients/Add_3_grad/Shape"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
+          }
+          dim {
+            size: 32
+          }
+          dim {
+            size: 32
+          }
+          dim {
+            size: 256
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Add_3_grad/Sum_1"
+  op: "Sum"
+  input: "gradients/Relu_8_grad/ReluGrad"
+  input: "gradients/Add_3_grad/BroadcastGradientArgs:1"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tidx"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          unknown_rank: true
+        }
+      }
+    }
+  }
+  attr {
+    key: "keep_dims"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "gradients/Add_3_grad/Reshape_1"
+  op: "Reshape"
+  input: "gradients/Add_3_grad/Sum_1"
+  input: "gradients/Add_3_grad/Shape_1"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
           }
           dim {
             size: 32
@@ -41664,12 +42891,13 @@ node {
 node {
   name: "gradients/Add_3_grad/tuple/group_deps"
   op: "NoOp"
-  input: "^gradients/Relu_8_grad/ReluGrad"
+  input: "^gradients/Add_3_grad/Reshape"
+  input: "^gradients/Add_3_grad/Reshape_1"
 }
 node {
   name: "gradients/Add_3_grad/tuple/control_dependency"
   op: "Identity"
-  input: "gradients/Relu_8_grad/ReluGrad"
+  input: "gradients/Add_3_grad/Reshape"
   input: "^gradients/Add_3_grad/tuple/group_deps"
   attr {
     key: "T"
@@ -41681,7 +42909,7 @@ node {
     key: "_class"
     value {
       list {
-        s: "loc:@gradients/Relu_8_grad/ReluGrad"
+        s: "loc:@gradients/Add_3_grad/Reshape"
       }
     }
   }
@@ -41691,7 +42919,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 32
@@ -41710,7 +42938,7 @@ node {
 node {
   name: "gradients/Add_3_grad/tuple/control_dependency_1"
   op: "Identity"
-  input: "gradients/Relu_8_grad/ReluGrad"
+  input: "gradients/Add_3_grad/Reshape_1"
   input: "^gradients/Add_3_grad/tuple/group_deps"
   attr {
     key: "T"
@@ -41722,7 +42950,7 @@ node {
     key: "_class"
     value {
       list {
-        s: "loc:@gradients/Relu_8_grad/ReluGrad"
+        s: "loc:@gradients/Add_3_grad/Reshape_1"
       }
     }
   }
@@ -41732,7 +42960,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 32
@@ -41968,7 +43196,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 32
@@ -42043,7 +43271,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -42110,7 +43338,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -42244,7 +43472,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -42328,7 +43556,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -42628,7 +43856,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -42702,7 +43930,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -42830,7 +44058,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -42914,7 +44142,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -43214,7 +44442,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -43303,7 +44531,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -43336,7 +44564,240 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 128
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Add_2_grad/Shape"
+  op: "Shape"
+  input: "conv2d_9/Conv2D"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 4
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "gradients/Add_2_grad/Shape_1"
+  op: "Shape"
+  input: "max_pooling2d_2/MaxPool"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 4
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "gradients/Add_2_grad/BroadcastGradientArgs"
+  op: "BroadcastGradientArgs"
+  input: "gradients/Add_2_grad/Shape"
+  input: "gradients/Add_2_grad/Shape_1"
+  attr {
+    key: "T"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
+          }
+        }
+        shape {
+          dim {
+            size: -1
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Add_2_grad/Sum"
+  op: "Sum"
+  input: "gradients/Relu_6_grad/ReluGrad"
+  input: "gradients/Add_2_grad/BroadcastGradientArgs"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tidx"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          unknown_rank: true
+        }
+      }
+    }
+  }
+  attr {
+    key: "keep_dims"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "gradients/Add_2_grad/Reshape"
+  op: "Reshape"
+  input: "gradients/Add_2_grad/Sum"
+  input: "gradients/Add_2_grad/Shape"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 64
+          }
+          dim {
+            size: 128
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Add_2_grad/Sum_1"
+  op: "Sum"
+  input: "gradients/Relu_6_grad/ReluGrad"
+  input: "gradients/Add_2_grad/BroadcastGradientArgs:1"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tidx"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          unknown_rank: true
+        }
+      }
+    }
+  }
+  attr {
+    key: "keep_dims"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "gradients/Add_2_grad/Reshape_1"
+  op: "Reshape"
+  input: "gradients/Add_2_grad/Sum_1"
+  input: "gradients/Add_2_grad/Shape_1"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
           }
           dim {
             size: 64
@@ -43355,12 +44816,13 @@ node {
 node {
   name: "gradients/Add_2_grad/tuple/group_deps"
   op: "NoOp"
-  input: "^gradients/Relu_6_grad/ReluGrad"
+  input: "^gradients/Add_2_grad/Reshape"
+  input: "^gradients/Add_2_grad/Reshape_1"
 }
 node {
   name: "gradients/Add_2_grad/tuple/control_dependency"
   op: "Identity"
-  input: "gradients/Relu_6_grad/ReluGrad"
+  input: "gradients/Add_2_grad/Reshape"
   input: "^gradients/Add_2_grad/tuple/group_deps"
   attr {
     key: "T"
@@ -43372,7 +44834,7 @@ node {
     key: "_class"
     value {
       list {
-        s: "loc:@gradients/Relu_6_grad/ReluGrad"
+        s: "loc:@gradients/Add_2_grad/Reshape"
       }
     }
   }
@@ -43382,7 +44844,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -43401,7 +44863,7 @@ node {
 node {
   name: "gradients/Add_2_grad/tuple/control_dependency_1"
   op: "Identity"
-  input: "gradients/Relu_6_grad/ReluGrad"
+  input: "gradients/Add_2_grad/Reshape_1"
   input: "^gradients/Add_2_grad/tuple/group_deps"
   attr {
     key: "T"
@@ -43413,7 +44875,7 @@ node {
     key: "_class"
     value {
       list {
-        s: "loc:@gradients/Relu_6_grad/ReluGrad"
+        s: "loc:@gradients/Add_2_grad/Reshape_1"
       }
     }
   }
@@ -43423,7 +44885,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -43659,7 +45121,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 64
@@ -43734,7 +45196,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -43801,7 +45263,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -43935,7 +45397,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -44019,7 +45481,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -44319,7 +45781,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -44393,7 +45855,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -44521,7 +45983,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -44605,7 +46067,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -44905,7 +46367,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -44994,7 +46456,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -45027,7 +46489,240 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
+          }
+          dim {
+            size: 128
+          }
+          dim {
+            size: 128
+          }
+          dim {
+            size: 64
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Add_1_grad/Shape"
+  op: "Shape"
+  input: "conv2d_6/Conv2D"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 4
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "gradients/Add_1_grad/Shape_1"
+  op: "Shape"
+  input: "max_pooling2d_1/MaxPool"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 4
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "gradients/Add_1_grad/BroadcastGradientArgs"
+  op: "BroadcastGradientArgs"
+  input: "gradients/Add_1_grad/Shape"
+  input: "gradients/Add_1_grad/Shape_1"
+  attr {
+    key: "T"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
+          }
+        }
+        shape {
+          dim {
+            size: -1
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Add_1_grad/Sum"
+  op: "Sum"
+  input: "gradients/Relu_4_grad/ReluGrad"
+  input: "gradients/Add_1_grad/BroadcastGradientArgs"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tidx"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          unknown_rank: true
+        }
+      }
+    }
+  }
+  attr {
+    key: "keep_dims"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "gradients/Add_1_grad/Reshape"
+  op: "Reshape"
+  input: "gradients/Add_1_grad/Sum"
+  input: "gradients/Add_1_grad/Shape"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
+          }
+          dim {
+            size: 128
+          }
+          dim {
+            size: 128
+          }
+          dim {
+            size: 64
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Add_1_grad/Sum_1"
+  op: "Sum"
+  input: "gradients/Relu_4_grad/ReluGrad"
+  input: "gradients/Add_1_grad/BroadcastGradientArgs:1"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tidx"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          unknown_rank: true
+        }
+      }
+    }
+  }
+  attr {
+    key: "keep_dims"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "gradients/Add_1_grad/Reshape_1"
+  op: "Reshape"
+  input: "gradients/Add_1_grad/Sum_1"
+  input: "gradients/Add_1_grad/Shape_1"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
           }
           dim {
             size: 128
@@ -45046,12 +46741,13 @@ node {
 node {
   name: "gradients/Add_1_grad/tuple/group_deps"
   op: "NoOp"
-  input: "^gradients/Relu_4_grad/ReluGrad"
+  input: "^gradients/Add_1_grad/Reshape"
+  input: "^gradients/Add_1_grad/Reshape_1"
 }
 node {
   name: "gradients/Add_1_grad/tuple/control_dependency"
   op: "Identity"
-  input: "gradients/Relu_4_grad/ReluGrad"
+  input: "gradients/Add_1_grad/Reshape"
   input: "^gradients/Add_1_grad/tuple/group_deps"
   attr {
     key: "T"
@@ -45063,7 +46759,7 @@ node {
     key: "_class"
     value {
       list {
-        s: "loc:@gradients/Relu_4_grad/ReluGrad"
+        s: "loc:@gradients/Add_1_grad/Reshape"
       }
     }
   }
@@ -45073,7 +46769,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -45092,7 +46788,7 @@ node {
 node {
   name: "gradients/Add_1_grad/tuple/control_dependency_1"
   op: "Identity"
-  input: "gradients/Relu_4_grad/ReluGrad"
+  input: "gradients/Add_1_grad/Reshape_1"
   input: "^gradients/Add_1_grad/tuple/group_deps"
   attr {
     key: "T"
@@ -45104,7 +46800,7 @@ node {
     key: "_class"
     value {
       list {
-        s: "loc:@gradients/Relu_4_grad/ReluGrad"
+        s: "loc:@gradients/Add_1_grad/Reshape_1"
       }
     }
   }
@@ -45114,7 +46810,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -45350,7 +47046,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 128
@@ -45425,7 +47121,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -45492,7 +47188,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -45626,7 +47322,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -45710,7 +47406,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -46010,7 +47706,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -46084,7 +47780,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -46212,7 +47908,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -46296,7 +47992,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -46596,7 +48292,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -46685,7 +48381,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -46718,7 +48414,240 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
+          }
+          dim {
+            size: 256
+          }
+          dim {
+            size: 256
+          }
+          dim {
+            size: 32
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Add_grad/Shape"
+  op: "Shape"
+  input: "conv2d_3/Conv2D"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 4
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "gradients/Add_grad/Shape_1"
+  op: "Shape"
+  input: "max_pooling2d/MaxPool"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: 4
+          }
+        }
+      }
+    }
+  }
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "gradients/Add_grad/BroadcastGradientArgs"
+  op: "BroadcastGradientArgs"
+  input: "gradients/Add_grad/Shape"
+  input: "gradients/Add_grad/Shape_1"
+  attr {
+    key: "T"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
+          }
+        }
+        shape {
+          dim {
+            size: -1
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Add_grad/Sum"
+  op: "Sum"
+  input: "gradients/Relu_2_grad/ReluGrad"
+  input: "gradients/Add_grad/BroadcastGradientArgs"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tidx"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          unknown_rank: true
+        }
+      }
+    }
+  }
+  attr {
+    key: "keep_dims"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "gradients/Add_grad/Reshape"
+  op: "Reshape"
+  input: "gradients/Add_grad/Sum"
+  input: "gradients/Add_grad/Shape"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
+          }
+          dim {
+            size: 256
+          }
+          dim {
+            size: 256
+          }
+          dim {
+            size: 32
+          }
+        }
+      }
+    }
+  }
+}
+node {
+  name: "gradients/Add_grad/Sum_1"
+  op: "Sum"
+  input: "gradients/Relu_2_grad/ReluGrad"
+  input: "gradients/Add_grad/BroadcastGradientArgs:1"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tidx"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          unknown_rank: true
+        }
+      }
+    }
+  }
+  attr {
+    key: "keep_dims"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "gradients/Add_grad/Reshape_1"
+  op: "Reshape"
+  input: "gradients/Add_grad/Sum_1"
+  input: "gradients/Add_grad/Shape_1"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "Tshape"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+          dim {
+            size: -1
           }
           dim {
             size: 256
@@ -46737,12 +48666,13 @@ node {
 node {
   name: "gradients/Add_grad/tuple/group_deps"
   op: "NoOp"
-  input: "^gradients/Relu_2_grad/ReluGrad"
+  input: "^gradients/Add_grad/Reshape"
+  input: "^gradients/Add_grad/Reshape_1"
 }
 node {
   name: "gradients/Add_grad/tuple/control_dependency"
   op: "Identity"
-  input: "gradients/Relu_2_grad/ReluGrad"
+  input: "gradients/Add_grad/Reshape"
   input: "^gradients/Add_grad/tuple/group_deps"
   attr {
     key: "T"
@@ -46754,7 +48684,7 @@ node {
     key: "_class"
     value {
       list {
-        s: "loc:@gradients/Relu_2_grad/ReluGrad"
+        s: "loc:@gradients/Add_grad/Reshape"
       }
     }
   }
@@ -46764,7 +48694,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -46783,7 +48713,7 @@ node {
 node {
   name: "gradients/Add_grad/tuple/control_dependency_1"
   op: "Identity"
-  input: "gradients/Relu_2_grad/ReluGrad"
+  input: "gradients/Add_grad/Reshape_1"
   input: "^gradients/Add_grad/tuple/group_deps"
   attr {
     key: "T"
@@ -46795,7 +48725,7 @@ node {
     key: "_class"
     value {
       list {
-        s: "loc:@gradients/Relu_2_grad/ReluGrad"
+        s: "loc:@gradients/Add_grad/Reshape_1"
       }
     }
   }
@@ -46805,7 +48735,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -47041,7 +48971,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 256
@@ -47116,7 +49046,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -47183,7 +49113,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -47317,7 +49247,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -47401,7 +49331,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -47701,7 +49631,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -47775,7 +49705,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -47903,7 +49833,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -47987,7 +49917,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -48287,7 +50217,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -48376,7 +50306,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -48409,7 +50339,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -48537,7 +50467,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -48621,7 +50551,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -48704,7 +50634,7 @@ node {
 node {
   name: "gradients/conv2d/Conv2D_grad/ShapeN"
   op: "ShapeN"
-  input: "random_shuffle_queue_DequeueMany:1"
+  input: "fifo_queue_DequeueUpTo:1"
   input: "conv2d/kernel/read"
   attr {
     key: "N"
@@ -48819,7 +50749,7 @@ node {
 node {
   name: "gradients/conv2d/Conv2D_grad/Conv2DBackpropFilter"
   op: "Conv2DBackpropFilter"
-  input: "random_shuffle_queue_DequeueMany:1"
+  input: "fifo_queue_DequeueUpTo:1"
   input: "gradients/conv2d/Conv2D_grad/ShapeN:1"
   input: "gradients/batch_normalization/FusedBatchNorm_grad/tuple/control_dependency"
   attr {
@@ -48921,7 +50851,7 @@ node {
       list {
         shape {
           dim {
-            size: 1
+            size: -1
           }
           dim {
             size: 512
@@ -51863,158 +53793,14 @@ node {
   }
 }
 node {
-  name: "ArgMax/dimension"
-  op: "Const"
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-        }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-        }
-        int_val: 3
-      }
-    }
-  }
-}
-node {
-  name: "ArgMax"
-  op: "ArgMax"
-  input: "random_shuffle_queue_DequeueMany:2"
-  input: "ArgMax/dimension"
-  attr {
-    key: "T"
-    value {
-      type: DT_FLOAT
-    }
-  }
-  attr {
-    key: "Tidx"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: 1
-          }
-          dim {
-            size: 512
-          }
-          dim {
-            size: 512
-          }
-        }
-      }
-    }
-  }
-  attr {
-    key: "output_type"
-    value {
-      type: DT_INT64
-    }
-  }
-}
-node {
-  name: "ArgMax_1/dimension"
-  op: "Const"
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-        }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-        }
-        int_val: 3
-      }
-    }
-  }
-}
-node {
-  name: "ArgMax_1"
-  op: "ArgMax"
-  input: "Sigmoid"
-  input: "ArgMax_1/dimension"
-  attr {
-    key: "T"
-    value {
-      type: DT_FLOAT
-    }
-  }
-  attr {
-    key: "Tidx"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: 1
-          }
-          dim {
-            size: 512
-          }
-          dim {
-            size: 512
-          }
-        }
-      }
-    }
-  }
-  attr {
-    key: "output_type"
-    value {
-      type: DT_INT64
-    }
-  }
-}
-node {
   name: "Equal"
   op: "Equal"
-  input: "ArgMax_1"
-  input: "ArgMax"
+  input: "Relu_19"
+  input: "fifo_queue_DequeueUpTo:2"
   attr {
     key: "T"
     value {
-      type: DT_INT64
+      type: DT_FLOAT
     }
   }
   attr {
@@ -52023,13 +53809,16 @@ node {
       list {
         shape {
           dim {
+            size: -1
+          }
+          dim {
+            size: 512
+          }
+          dim {
+            size: 512
+          }
+          dim {
             size: 1
-          }
-          dim {
-            size: 512
-          }
-          dim {
-            size: 512
           }
         }
       }
@@ -52058,13 +53847,16 @@ node {
       list {
         shape {
           dim {
+            size: -1
+          }
+          dim {
+            size: 512
+          }
+          dim {
+            size: 512
+          }
+          dim {
             size: 1
-          }
-          dim {
-            size: 512
-          }
-          dim {
-            size: 512
           }
         }
       }
@@ -52379,7 +54171,14 @@ node {
 }
 node {
   name: "accuracy/Size"
-  op: "Const"
+  op: "Size"
+  input: "ToFloat"
+  attr {
+    key: "T"
+    value {
+      type: DT_FLOAT
+    }
+  }
   attr {
     key: "_output_shapes"
     value {
@@ -52390,20 +54189,9 @@ node {
     }
   }
   attr {
-    key: "dtype"
+    key: "out_type"
     value {
       type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-        }
-        int_val: 262144
-      }
     }
   }
 }
@@ -52442,7 +54230,7 @@ node {
       list {
         shape {
           dim {
-            size: 3
+            size: 4
           }
         }
       }
@@ -52461,10 +54249,10 @@ node {
         dtype: DT_INT32
         tensor_shape {
           dim {
-            size: 3
+            size: 4
           }
         }
-        tensor_content: "\000\000\000\000\001\000\000\000\002\000\000\000"
+        tensor_content: "\000\000\000\000\001\000\000\000\002\000\000\000\003\000\000\000"
       }
     }
   }
@@ -61664,7 +63452,7 @@ node {
 node {
   name: "Merge/MergeSummary"
   op: "MergeSummary"
-  input: "enqueue_input/queue/enqueue_input/random_shuffle_queuefraction_over_250_of_750_full"
+  input: "enqueue_input/queue/enqueue_input/fifo_queuefraction_over_0_of_1000_full"
   input: "loss"
   attr {
     key: "N"
@@ -61737,7 +63525,7 @@ node {
         dtype: DT_STRING
         tensor_shape {
         }
-        string_val: "_temp_28d6c01e465d4b708a388cfcdcd123d9/part"
+        string_val: "_temp_471cd15572c64f90b7911ae7d735ec97/part"
       }
     }
   }

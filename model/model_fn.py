@@ -17,7 +17,7 @@ def patch_segmentation_fn(features, labels, mode, params):
 
     def iou_loss(label,predict):
         inter=tf.reduce_sum(tf.multiply(predict,label))
-        union=tf.reduce_sum(tf.subtract(tf.add(predict,label),tf.multiply(predict,label)))
+        union=tf.reduce_sum(tf.subtract(tf.add(predict,label),tf.multiply(predict,label)))+1e-8
         loss=tf.subtract(tf.constant(1.0, dtype=tf.float32),tf.divide(inter,union))
         return loss
 
@@ -30,12 +30,9 @@ def patch_segmentation_fn(features, labels, mode, params):
         if labels is None:
             return tf.estimator.EstimatorSpec(mode=mode,predictions={"result": tf.argmax(predict, axis=3),'predict':predict,'data':features["images"]})
         else:        
-            return tf.estimator.EstimatorSpec(mode=mode,predictions={"result": tf.argmax(predict, axis=3),'predict':predict,'data':features["images"],'loss':loss})
+            return tf.estimator.EstimatorSpec(mode=mode,predictions={"label":labels,'predict':predict,'data':features["images"],'loss':loss})
     
-    eval_metric_ops = {"Accuracy": tf.metrics.accuracy(
-        labels=tf.argmax(labels, axis=3),
-        predictions=tf.argmax(predict, axis=3))}
-        
+    eval_metric_ops = {'Accuracy':tf.metrics.accuracy(labels,predict),'label':labels,'predict':predict,'data':features['images']}
     if mode == tf.estimator.ModeKeys.EVAL:
         return tf.estimator.EstimatorSpec(mode=mode,loss=loss,eval_metric_ops=eval_metric_ops)
 
