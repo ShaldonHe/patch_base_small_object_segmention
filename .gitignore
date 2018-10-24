@@ -8,4 +8,4 @@
 *.jpeg
 *.jpg
 *.bmp
-
+data/model/segmentation/*

@@ -17,7 +17,7 @@ def patch_segmentation(x, is_training):
     print('-'*120)
     k_size=3
     p_size=2
-    init_filter=32
+    init_filter=16
     model_parms=dict(kernel_size=(k_size,k_size),conv=_l.Conv.conv2d,norm=_l.Norm.batch,activation=_op.Activation.relu)
     block_0=_bk.conv_norm_activation(x,filters=init_filter,**model_parms)
     block_1=_bk.res_v1_block(block_0,**model_parms) 

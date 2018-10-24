@@ -16,7 +16,6 @@ def patch_segmentation_fn(features, labels, mode, params):
     optimizer = tf.train.GradientDescentOptimizer(learning_rate=params['learning_rate'])
 
     def iou_loss(label,predict):
-        
         inter=tf.reduce_sum(tf.multiply(predict,label))
         union=tf.reduce_sum(tf.subtract(tf.add(predict,label),tf.multiply(predict,label)))
         loss=tf.subtract(tf.constant(1.0, dtype=tf.float32),tf.divide(inter,union))
@@ -33,8 +32,6 @@ def patch_segmentation_fn(features, labels, mode, params):
         else:        
             return tf.estimator.EstimatorSpec(mode=mode,predictions={"result": tf.argmax(predict, axis=3),'predict':predict,'data':features["images"],'loss':loss})
     
-
-
     eval_metric_ops = {"Accuracy": tf.metrics.accuracy(
         labels=tf.argmax(labels, axis=3),
         predictions=tf.argmax(predict, axis=3))}
