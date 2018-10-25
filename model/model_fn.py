@@ -16,16 +16,16 @@ def patch_segmentation_fn(features, labels, mode, params):
     optimizer = tf.train.GradientDescentOptimizer(learning_rate=params['learning_rate'])
 
     def iou_loss(label,predict):
-        inter=tf.reduce_sum(tf.multiply(predict,label))+1e-8
-        union=tf.reduce_sum(tf.subtract(tf.add(predict,label),tf.multiply(predict,label)))+1e-8
+        inter=tf.reduce_sum(tf.multiply(label,predict))+1e-8
+        union=tf.reduce_sum(tf.subtract(tf.add(label,predict),tf.multiply(label,predict)))+1e-8
         loss=tf.subtract(tf.constant(1.0, dtype=tf.float32),tf.divide(inter,union))
-        loss=loss+tf.losses.mean_squared_error(label,predict)
+        # loss=loss+tf.losses.mean_squared_error(label,predict)
         return loss
 
     if labels is not None:
-        tf.metrics.mean_iou
-        loss = tf.losses.mean_squared_error(labels,predict)#iou_loss(labels,predict)
-        loss = tf.reduce_sum(tf.sqrt( tf.abs(labels-predict)))
+        loss = iou_loss(labels,predict)
+        # loss = tf.losses.mean_squared_error(labels,predict)#iou_loss(labels,predict)
+        # loss = tf.reduce_sum(tf.sqrt( tf.abs(labels-predict)))
         train_op = optimizer.minimize(loss=loss, global_step=tf.train.get_global_step())
 
     if mode == tf.estimator.ModeKeys.PREDICT:
