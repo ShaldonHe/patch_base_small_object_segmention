@@ -43,8 +43,8 @@ def activate_progress():
     print(args)
     p=0.5
 
+    data,label= data_input.MA_segmention_data()
     # data,label= data_input.MA_segmention_debug_data()
-    data,label= data_input.MA_segmention_debug_data()
     rank_list=libdi.rank_list(len(label))
     for epoch in range(args.n_epoch):
         print('num of data:',len(label))
