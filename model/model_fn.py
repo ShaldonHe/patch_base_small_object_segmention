@@ -23,8 +23,8 @@ def patch_segmentation_fn(features, labels, mode, params):
         return loss
 
     if labels is not None:
-        loss = iou_loss(labels,predict)
-        # loss = tf.losses.mean_squared_error(labels,predict)#iou_loss(labels,predict)
+        # loss = iou_loss(labels,predict)
+        loss = tf.losses.mean_squared_error(labels,predict)#iou_loss(labels,predict)
         # loss = tf.reduce_sum(tf.sqrt( tf.abs(labels-predict)))
         train_op = optimizer.minimize(loss=loss, global_step=tf.train.get_global_step())
 
