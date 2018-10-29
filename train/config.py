@@ -5,6 +5,7 @@ import model.config as _model_con
 _model_c_g=_model_con.parse_g_args()
 _model_c_d=_model_con.parse_d_args()
 _model_c_s=_model_con.parse_args()
+_model_c_m=_model_con.parse_multitask_args()
 """parsing and configuration"""
 def parse_args():
     desc = "patch based tiny object segmentation train config"
@@ -16,6 +17,7 @@ def parse_args():
     parser.add_argument('--model_g_dir', type=str, default=_model_c_g.model_dir)
     parser.add_argument('--model_s_dir', type=str, default=_model_c_s.model_dir)
     parser.add_argument('--model_d_dir', type=str, default=_model_c_d.model_dir)
+    parser.add_argument('--model_d_dir', type=str, default=_model_c_m.model_dir)
     parser.add_argument('--shuffle', type=bool, default=True)
     parser.add_argument('--n_epoch', type=int, default=20)
     return parser.parse_args()
