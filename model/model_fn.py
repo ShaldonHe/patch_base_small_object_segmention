@@ -3,6 +3,7 @@ from tensorflow import nn as nn
 from tensorflow.python.training import training
 from model.Nets import patch_generator as g_patch
 from model.Nets import patch_discriminator as d_patch
+from model.Nets import patch_multi_task as multi_patch
 from . import config as _c
 _layer_c=_c.parse_args()
 
