@@ -30,7 +30,7 @@ def patch_segmentation(x, is_training):
     unet_conv_t_1=_bk.ushape_block(unet_conv_t_2,block_0,img_size=block_0.shape[1:3].as_list(),filters=block_0.shape[3].value,**model_parms)
     unet_conv_t_0=_bk.ushape_block(unet_conv_t_1,x,img_size=x.shape[1:3].as_list(),filters=init_filter)
     # result=_bk.conv_norm_activation(unet_conv_t_0,filters=_c_s.layer_num,kernel_size=(1,1),activation=None)
-    result=_bk.conv_norm_activation(unet_conv_t_0,filters=_c_s.layer_num,kernel_size=(1,1),activation=_op.Activation.relu)
+    result=_bk.conv_norm_activation(unet_conv_t_0,filters=_c_s.layer_num,kernel_size=(1,1),activation=_op.Activation.sigmoid)
     print('-'*50,'Result Node Name','-'*50)
     print(result.name)
     print('-'*120)

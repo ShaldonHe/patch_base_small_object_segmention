@@ -41,7 +41,7 @@ def activate_progress():
     # config = config.replace(session_config=session_config)
     network = tf.estimator.Estimator(model_fn=model_fn.patch_segmentation_fn,model_dir=args.model_s_dir,config=config,params=model_params)
     print(args)
-    p=0.5
+    p=1.0
 
     data,label= data_input.MA_segmention_data()
     # data,label= data_input.MA_segmention_debug_data()

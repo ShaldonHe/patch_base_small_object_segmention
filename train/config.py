@@ -11,7 +11,7 @@ def parse_args():
     parser = ag.ArgumentParser(description=desc)
     parser.add_argument('--train_batch_size', type=int, default=1, help='The size of batch')
     parser.add_argument('--eval_batch_size', type=int, default=10, help='The size of batch')
-    parser.add_argument('--learning_rate', type=float, default=1e-2, help='The Learning Rate')
+    parser.add_argument('--learning_rate', type=float, default=1000, help='The Learning Rate')
     parser.add_argument('--dtype',type=type,default=np.float32)
     parser.add_argument('--model_g_dir', type=str, default=_model_c_g.model_dir)
     parser.add_argument('--model_s_dir', type=str, default=_model_c_s.model_dir)
