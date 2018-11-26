@@ -20,6 +20,15 @@ def parse_args():
     parser.add_argument('--origin_image_dir', type=str, default='/home/xiaodonghe/Documents/Data/CHXD/segmentation/Train/Images/Enhanced')
     parser.add_argument('--origin_label_dir', type=str, default='/home/xiaodonghe/Documents/Data/CHXD/segmentation/Train/Labels/Cropped')
 
+    parser.add_argument('--origin_data_root', type=str, default='/home/xiaodonghe/Documents/Data/CHXD/segmentation/Train/')
+    parser.add_argument('--origin_data_structure', type=dict, default={
+        'image':'Images/Enhanced',
+        'label':'Labels/Cropped',
+        'vessel':'Labels/Vessel'
+    })
+    parser.add_argument('--model_data_dir', type=str, default='./data/model/data/train')
+
+
     parser.add_argument('--model_image_dir', type=str, default='./data/model/data/prep_image')
     parser.add_argument('--model_label_dir', type=str, default='./data/model/data/prep_label')
 
@@ -30,7 +39,7 @@ def parse_args():
     
     parser.add_argument('--radius', type=int, default=_m_c.input_shape[0]//2,help='block radius')
     parser.add_argument('--pyramids', type=list, default=_m_c.pyramids)
-    parser.add_argument('--stride', type=int, default=max(_m_c.input_shape[0]//2,8),help='block stride in train progress')
+    parser.add_argument('--stride', type=int, default=max(_m_c.input_shape[0]//4,8),help='block stride in train progress')
 
     parser.add_argument('--patch_shape', type=list, default=_m_c.input_shape[0:2])
     

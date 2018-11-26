@@ -15,12 +15,12 @@ def parse_args():
     parser.add_argument('--prep_size',type=tuple,default=(2048,2048))
 
     # patch data path
-    parser.add_argument('--model_image_dir', type=str, default=_data_c.model_image_dir)
+    parser.add_argument('--model_data_dir', type=str, default=_data_c.model_data_dir)
     parser.add_argument('--model_label_dir', type=str, default=_data_c.model_label_dir)
 
     # origin data path
-    parser.add_argument('--origin_image_path', type=str, default=_data_c.origin_image_dir)
-    parser.add_argument('--origin_label_path', type=str, default=_data_c.origin_label_dir)
+    parser.add_argument('--origin_data_root', type=str, default=_data_c.origin_data_root)
+    parser.add_argument('--origin_data_structure', type=dict, default=_data_c.origin_data_structure)
 
     # data info file
     parser.add_argument('--data_info_file', type=str, default='./data/model/data/data_layer_info.npz')
