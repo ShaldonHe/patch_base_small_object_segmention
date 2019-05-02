@@ -9,11 +9,10 @@ from . import config as _con
 args=_con.parse_args()
 import os
 os.environ['CUDA_VISIBLE_DEVICES'] = '1'
-
 def norm_progress():
     model_params = {"learning_rate": args.learning_rate,'model_dir':args.model_s_dir}
     session_config = tf.ConfigProto(log_device_placement=True)
-    session_config.gpu_options.per_process_gpu_memory_fraction = 0.9
+    session_config.gpu_options.per_process_gpu_memory_fraction = 0.8
     config=tfe.RunConfig(model_dir=args.model_s_dir,save_summary_steps=10)
     config = config.replace(session_config=session_config)
     network = tf.estimator.Estimator(
@@ -23,13 +22,13 @@ def norm_progress():
         params=model_params)
     input_fn,data,label= data_input.MA_segmention_input()
     print('num of data:',len(label))
-    print('batch_size:',args.batch_size)
+    print('batch_size:',args.train_batch_size)
     print('n_epoch:',args.n_epoch)
     print(args)
     for epoch in range(args.n_epoch):
         input_fn,data,label= data_input.MA_segmention_input()
         print('=========={}/{}=========='.format(epoch,args.n_epoch))
-        network.train(input_fn=input_fn,steps=len(label)//args.batch_size)
+        network.train(input_fn=input_fn,steps=len(label)//args.train_batch_size)
 
 def activate_progress():
     import libs.common.data_interface as libdi
@@ -41,7 +40,7 @@ def activate_progress():
     # config = config.replace(session_config=session_config)
     network = tf.estimator.Estimator(model_fn=model_fn.patch_segmentation_fn,model_dir=args.model_s_dir,config=config,params=model_params)
     print(args)
-    p=0.5
+    p=1.0
 
     data,label= data_input.MA_segmention_data()
     # data,label= data_input.MA_segmention_debug_data()
@@ -74,14 +73,14 @@ def activate_progress():
 def multitask_progress():
     import libs.common.data_interface as libdi
     import libs.model.losses as libms
-    model_params = {"learning_rate": args.learning_rate,'model_dir':args.model_s_dir}
-    # session_config = tf.ConfigProto(log_device_placement=True)
-    # session_config.gpu_options.per_process_gpu_memory_fraction = 0.9
-    config=tfe.RunConfig(model_dir=args.model_s_dir,save_summary_steps=10)
+    model_params = {"learning_rate": args.learning_rate,'model_dir':args.model_m_dir}
+    session_config = tf.ConfigProto(log_device_placement=True)
+    session_config.gpu_options.per_process_gpu_memory_fraction = 0.8
+    config=tfe.RunConfig(model_dir=args.model_m_dir,save_summary_steps=10)
     # config = config.replace(session_config=session_config)
-    network = tf.estimator.Estimator(model_fn=model_fn.patch_multitask_fn,model_dir=args.model_s_dir,config=config,params=model_params)
+    network = tf.estimator.Estimator(model_fn=model_fn.patch_multitask_fn,model_dir=args.model_m_dir,config=config,params=model_params)
     print(args)
-    p=0.5
+    p=0.7
 
     data,label= data_input.MA_segmention_data()
     # data,label= data_input.MA_segmention_debug_data()
@@ -96,20 +95,20 @@ def multitask_progress():
         input_fn=tfe.inputs.numpy_input_fn(x={"images":data},y=label,batch_size=args.train_batch_size,shuffle=False)
         print('==== train:{}/{}=========='.format(epoch,args.n_epoch))
         network.train(input_fn=input_fn,steps=len(label)//args.train_batch_size)
-        print('===== eval:{}/{}=========='.format(epoch,args.n_epoch))
-        data.update_index()
-        label.update_index()
+        # print('===== eval:{}/{}=========='.format(epoch,args.n_epoch))
+        # data.update_index()
+        # label.update_index()
 
-        input_fn=tfe.inputs.numpy_input_fn(x={"images":data},y=label,batch_size=args.eval_batch_size,shuffle=False)
-        r=network.predict(input_fn=input_fn)
-        total_loss=0
-        for i,_r in enumerate(r):
-            l_loss=libms.np_iou_loss(_r['predict'][:,:,0],label[i][0][:,:,0])
-            total_loss+=l_loss
-            rank_list.update(i,l_loss)
-        rank_list.sort()
-        print('eval_loss:{}'.format(total_loss/len(label)))
-        print('==========={}/{}=end======'.format(epoch,args.n_epoch))
+        # input_fn=tfe.inputs.numpy_input_fn(x={"images":data},y=label,batch_size=args.eval_batch_size,shuffle=False)
+        # r=network.predict(input_fn=input_fn)
+        # total_loss=0
+        # for i,_r in enumerate(r):
+        #     l_loss=libms.np_iou_loss(_r['predict'][:,:,0],label[i][0][:,:,0])
+        #     total_loss+=l_loss
+        #     rank_list.update(i,l_loss)
+        # rank_list.sort()
+        # print('eval_loss:{}'.format(total_loss/len(label)))
+        # print('==========={}/{}=end======'.format(epoch,args.n_epoch))
 
 def my_gan_progress():
 

@@ -30,7 +30,7 @@ def patch_segmentation(x, is_training):
     unet_conv_t_1=_bk.ushape_block(unet_conv_t_2,block_0,img_size=block_0.shape[1:3].as_list(),filters=block_0.shape[3].value,**model_parms)
     unet_conv_t_0=_bk.ushape_block(unet_conv_t_1,x,img_size=x.shape[1:3].as_list(),filters=init_filter)
     # result=_bk.conv_norm_activation(unet_conv_t_0,filters=_c_s.layer_num,kernel_size=(1,1),activation=None)
-    result=_bk.conv_norm_activation(unet_conv_t_0,filters=_c_s.layer_num,kernel_size=(1,1),activation=_op.Activation.relu)
+    result=_bk.conv_norm_activation(unet_conv_t_0,filters=_c_s.layer_num,kernel_size=(1,1),activation=_op.Activation.sigmoid)
     print('-'*50,'Result Node Name','-'*50)
     print(result.name)
     print('-'*120)
@@ -103,8 +103,8 @@ def patch_multi_task(x, is_training):
     print('-'*120)
     k_size=3
     init_filter=32
-    # model_parms=dict(kernel_size=(k_size,k_size),conv=_l.Conv.conv2d,norm=_l.Norm.batch,activation=_op.Activation.leak_relu)
-    model_parms=dict(kernel_size=(k_size,k_size),conv=_l.Conv.conv2d,norm=_l.Norm.batch,activation=_op.Activation.relu )
+    model_parms=dict(kernel_size=(k_size,k_size),conv=_l.Conv.separable_conv2d,norm=_l.Norm.batch,activation=_op.Activation.relu)
+#     model_parms=dict(kernel_size=(k_size,k_size),conv=_l.Conv.conv2d,norm=_l.Norm.batch,activation=None )
     block_0=_bk.conv_norm_activation(x,filters=init_filter,**model_parms)
     block_1=_bk.res_v1_block(block_0,**model_parms) 
     block_2=_bk.res_v1_block(block_1,**model_parms)
@@ -126,3 +126,24 @@ def patch_multi_task(x, is_training):
         class_result=class_result,
         encode_layers=[block_0,block_1,block_2,block_3,block_4],
         decoder_layers=[unet_conv_t_4,unet_conv_t_3,unet_conv_t_2,unet_conv_t_1,unet_conv_t_0])
+
+
+
+def patch_classification(x, is_training):
+    # input data shape
+    # 64*64*(3:origin image )
+    print('-'*50,'Input Node Name','-'*50)
+    print(x.name)
+    print('-'*120)
+    k_size=3
+    init_filter=32
+    model_parms=dict(kernel_size=(k_size,k_size),conv=_l.Conv.separable_conv2d,norm=_l.Norm.batch,activation=_op.Activation.relu)
+#     model_parms=dict(kernel_size=(k_size,k_size),conv=_l.Conv.conv2d,norm=_l.Norm.batch,activation=None )
+    block_0=_bk.conv_norm_activation(x,filters=init_filter,**model_parms)
+    block_1=_bk.res_v1_block(block_0,**model_parms) 
+    block_2=_bk.res_v1_block(block_1,**model_parms)
+    block_3=_bk.res_v1_block(block_2,**model_parms) 
+    block_4=_bk.res_v1_block(block_3,**model_parms) 
+    class_layer=_l.pooling(block_4,_l.Pooling.global_avg_2d)
+    class_result=_l.dense(class_layer,units=_c_s.layer_num,activation=_op.Activation.relu)
+    return dict(class_result=class_result,encode_layers=[block_0,block_1,block_2,block_3,block_4])
